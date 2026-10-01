@@ -33,21 +33,67 @@ export default function Customizer() {
     "#ffe6f2", "#ffb3d9", "#ff80bf", "#ff4da6", "#ff1a8c", "#e60073", "#b30059", "#800040",
   ];
 
+  const extendedFonts = [
+    // Standard Fonts
+    { name: "Arial", value: "Arial, sans-serif" },
+    { name: "Times New Roman", value: "'Times New Roman', serif" },
+    { name: "Courier New", value: "'Courier New', monospace" },
+    { name: "Georgia", value: "Georgia, serif" },
+    { name: "Verdana", value: "Verdana, sans-serif" },
+    { name: "Trebuchet MS", value: "'Trebuchet MS', sans-serif" },
+    { name: "Impact", value: "Impact, sans-serif" },
+    { name: "Tahoma", value: "Tahoma, sans-serif" },
+    { name: "Garamond", value: "Garamond, serif" },
+    { name: "Comic Sans MS", value: "'Comic Sans MS', cursive" },
+
+    // Calligraphic & Script Fonts
+    { name: "Brush Script MT", value: "'Brush Script MT', cursive" },
+    { name: "Lucida Handwriting", value: "'Lucida Handwriting', cursive" },
+    { name: "Bradley Hand", value: "'Bradley Hand', cursive" },
+    { name: "Snell Roundhand", value: "'Snell Roundhand', cursive" },
+    { name: "Edwardian Script", value: "'Edwardian Script ITC', cursive" },
+    { name: "Papyrus", value: "Papyrus, fantasy" },
+    { name: "Apple Chancery", value: "'Apple Chancery', cursive" }
+  ];
+
   const renderPalette = (onSelect: (color: string) => void, id: string) => {
     if (openPicker !== id) return null;
     return (
       <div className="absolute top-12 left-0 z-50 bg-white p-3 rounded-xl shadow-2xl border border-gray-100 grid grid-cols-8 gap-1 w-max">
         {extendedPalette.map(color => (
-          <button 
+          <button
             key={color}
-            onClick={(e) => { 
+            onClick={(e) => {
               e.stopPropagation();
-              onSelect(color); 
-              setOpenPicker(null); 
+              onSelect(color);
+              setOpenPicker(null);
             }}
             className="w-5 h-5 rounded-[3px] hover:scale-125 transition-transform shadow-sm border border-black/5"
             style={{ backgroundColor: color }}
           />
+        ))}
+      </div>
+    );
+  };
+
+  const renderFontPalette = () => {
+    if (openPicker !== 'font') return null;
+    return (
+      <div className="absolute bottom-full right-0 mb-2 z-50 bg-white p-2 rounded-xl shadow-2xl border border-gray-100 flex flex-col gap-1 w-48 max-h-60 overflow-y-auto">
+        <div className="text-[10px] font-bold text-gray-400 px-3 py-1 uppercase tracking-widest">More Fonts</div>
+        {extendedFonts.map(font => (
+          <button
+            key={font.name}
+            onClick={(e) => {
+              e.stopPropagation();
+              setFontStyle(font.value);
+              setOpenPicker(null);
+            }}
+            className="w-full text-left px-3 py-2 text-sm rounded hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200"
+            style={{ fontFamily: font.value }}
+          >
+            {font.name}
+          </button>
         ))}
       </div>
     );
@@ -67,6 +113,7 @@ export default function Customizer() {
     { name: "Gold", hex: "#c19b38" },
     { name: "White", hex: "#ffffff" },
     { name: "Silver", hex: "#94a3b8" },
+    { name: "None", hex: "transparent" },
   ];
 
   const doubleBorderColors = [
@@ -77,12 +124,15 @@ export default function Customizer() {
   ];
 
   const getFontFamily = () => {
-    switch (fontStyle) {
-      case "Modern": return "font-sans font-bold tracking-[0.3em]";
-      case "Classic": return "font-serif italic font-semibold tracking-widest";
-      default: return "font-serif font-bold tracking-widest";
-    }
+    if (fontStyle === "Modern") return { className: "font-sans font-bold tracking-[0.3em]", style: {} };
+    if (fontStyle === "Classic") return { className: "font-serif italic font-semibold tracking-widest", style: {} };
+    if (fontStyle === "Serif") return { className: "font-serif font-bold tracking-widest", style: {} };
+
+    // Custom MS Word Font selected
+    return { className: "font-bold tracking-widest", style: { fontFamily: fontStyle } };
   };
+
+  const fontProps = getFontFamily();
 
   return (
     <section className="w-full bg-[#fdfbfb] px-8 md:px-16 pt-8 pb-16 flex flex-col items-center">
@@ -109,7 +159,7 @@ export default function Customizer() {
               className="relative w-[130px] min-h-[380px] h-fit shadow-2xl flex flex-col items-center justify-center transition-all duration-500"
               style={{
                 backgroundColor: baseColor,
-                border: `6px solid ${singleBorderColor}`,
+                border: singleBorderColor !== 'transparent' ? `6px solid ${singleBorderColor}` : 'none',
                 outline: doubleBorderColor !== 'transparent' ? `4px solid ${doubleBorderColor}` : 'none',
                 outlineOffset: '-10px',
                 borderBottomLeftRadius: '20px',
@@ -119,8 +169,8 @@ export default function Customizer() {
               }}
             >
               <div
-                className={`text-[#c19b38] text-[1.6rem] leading-none flex flex-col items-center justify-center gap-1 transition-all duration-300 drop-shadow-md py-8 ${getFontFamily()}`}
-                style={{ writingMode: 'vertical-rl', textOrientation: 'upright' }}
+                className={`text-[#c19b38] text-[1.6rem] leading-none transition-all duration-300 drop-shadow-md pt-16 pb-16 px-2 ${fontProps.className}`}
+                style={{ writingMode: 'vertical-rl', textOrientation: 'upright', ...fontProps.style }}
               >
                 {text.toUpperCase() || " "}
               </div>
@@ -155,7 +205,7 @@ export default function Customizer() {
                 />
               ))}
               <div className="relative w-9 h-9 group">
-                <button 
+                <button
                   onClick={() => setOpenPicker(openPicker === 'base' ? null : 'base')}
                   className="absolute inset-0 flex items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-gray-400 group-hover:border-[#c19b38] group-hover:text-[#c19b38] transition-colors bg-white outline-none focus:outline-none z-10"
                   title="Pick custom base color"
@@ -170,18 +220,20 @@ export default function Customizer() {
           {/* Single Border Select */}
           <div className="flex flex-col gap-2">
             <label className="text-[#c19b38] text-[10.5px] font-bold tracking-widest uppercase">2. SINGLE BORDER COLOR</label>
-            <div className="relative flex flex-wrap gap-4">
+            <div className="relative flex flex-wrap gap-4 items-center">
               {singleBorderColors.map(c => (
                 <button
                   key={c.name}
                   onClick={() => setSingleBorderColor(c.hex)}
-                  className={`w-9 h-9 rounded-full border-[3px] transition-all duration-200 ${singleBorderColor === c.hex ? 'border-[#c19b38] scale-110 shadow-md' : 'border-transparent hover:scale-105 shadow-sm'}`}
-                  style={{ backgroundColor: c.hex }}
+                  className={`w-9 h-9 rounded-full border-[3px] transition-all duration-200 flex items-center justify-center ${singleBorderColor === c.hex ? 'border-[#c19b38] scale-110 shadow-md' : 'border-transparent hover:scale-105 shadow-sm'}`}
+                  style={{ backgroundColor: c.hex === 'transparent' ? '#f8f8f8' : c.hex }}
                   title={c.name}
-                />
+                >
+                  {c.hex === 'transparent' && <span className="text-[8px] font-bold text-gray-400">NONE</span>}
+                </button>
               ))}
               <div className="relative w-9 h-9 group">
-                <button 
+                <button
                   onClick={() => setOpenPicker(openPicker === 'single' ? null : 'single')}
                   className="absolute inset-0 flex items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-gray-400 group-hover:border-[#c19b38] group-hover:text-[#c19b38] transition-colors bg-white outline-none focus:outline-none z-10"
                   title="Pick custom single border color"
@@ -209,7 +261,7 @@ export default function Customizer() {
                 </button>
               ))}
               <div className="relative w-9 h-9 group">
-                <button 
+                <button
                   onClick={() => setOpenPicker(openPicker === 'double' ? null : 'double')}
                   className="absolute inset-0 flex items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-gray-400 group-hover:border-[#c19b38] group-hover:text-[#c19b38] transition-colors bg-white outline-none focus:outline-none z-10"
                   title="Pick custom double border color"
@@ -246,6 +298,16 @@ export default function Customizer() {
                   {f}
                 </button>
               ))}
+              <div className="relative w-[3.25rem] group">
+                <button
+                  onClick={() => setOpenPicker(openPicker === 'font' ? null : 'font')}
+                  className={`w-full h-full flex items-center justify-center rounded-[12px] border transition-colors outline-none focus:outline-none z-10 ${!['Serif', 'Modern', 'Classic'].includes(fontStyle) ? 'bg-gray-900 border-gray-900 text-white shadow-md' : 'border-gray-200 text-gray-400 hover:border-[#c19b38] hover:text-[#c19b38] bg-white'}`}
+                  title="More fonts"
+                >
+                  <Plus size={16} strokeWidth={2.5} />
+                </button>
+                {renderFontPalette()}
+              </div>
             </div>
           </div>
 
