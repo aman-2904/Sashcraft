@@ -158,18 +158,43 @@ export default function Customizer() {
             <div
               className="relative w-[130px] min-h-[380px] h-fit shadow-2xl flex flex-col items-center justify-center transition-all duration-500"
               style={{
-                backgroundColor: baseColor,
-                border: singleBorderColor !== 'transparent' ? `6px solid ${singleBorderColor}` : 'none',
-                outline: doubleBorderColor !== 'transparent' ? `4px solid ${doubleBorderColor}` : 'none',
-                outlineOffset: '-10px',
-                borderBottomLeftRadius: '20px',
-                borderBottomRightRadius: '20px',
-                borderTopLeftRadius: '6px',
-                borderTopRightRadius: '6px'
+                backgroundColor: singleBorderColor !== 'transparent' ? singleBorderColor : baseColor,
+                clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 25px), 50% 100%, 0 calc(100% - 25px))'
               }}
             >
+              {/* Inner Base Color (if single border exists) */}
+              <div 
+                className="absolute inset-[6px]"
+                style={{
+                  backgroundColor: baseColor,
+                  clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 23px), 50% 100%, 0 calc(100% - 23px))'
+                }}
+              />
+
+              {/* Double Border (Outline) */}
+              {doubleBorderColor !== 'transparent' && (
+                <div 
+                  className="absolute inset-[10px]"
+                  style={{
+                    backgroundColor: doubleBorderColor,
+                    clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 21px), 50% 100%, 0 calc(100% - 21px))'
+                  }}
+                />
+              )}
+
+              {/* Double Border Inner Background (Hollow out the outline) */}
+              {doubleBorderColor !== 'transparent' && (
+                <div 
+                  className="absolute inset-[14px]"
+                  style={{
+                    backgroundColor: baseColor,
+                    clipPath: 'polygon(0 0, 100% 0, 100% calc(100% - 19px), 50% 100%, 0 calc(100% - 19px))'
+                  }}
+                />
+              )}
+
               <div
-                className={`text-[#c19b38] text-[1.6rem] leading-none transition-all duration-300 drop-shadow-md pt-16 pb-16 px-2 ${fontProps.className}`}
+                className={`relative z-10 text-[#c19b38] text-[1.6rem] leading-none transition-all duration-300 drop-shadow-md pt-16 pb-24 px-2 ${fontProps.className}`}
                 style={{ writingMode: 'vertical-rl', textOrientation: 'upright', ...fontProps.style }}
               >
                 {text.toUpperCase() || " "}
