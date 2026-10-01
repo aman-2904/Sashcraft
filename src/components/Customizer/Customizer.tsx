@@ -7,7 +7,7 @@ export default function Customizer() {
   const [baseColor, setBaseColor] = useState("#111111");
   const [singleBorderColor, setSingleBorderColor] = useState("#c42323");
   const [doubleBorderColor, setDoubleBorderColor] = useState("#d7be82");
-  const [text, setText] = useState("CLASS OF 20");
+  const [text, setText] = useState("CLASS OF 2026");
   const [fontStyle, setFontStyle] = useState("Serif"); // Serif, Modern, Classic
 
   // Base colors mapping
@@ -34,7 +34,7 @@ export default function Customizer() {
   ];
 
   const getFontFamily = () => {
-    switch(fontStyle) {
+    switch (fontStyle) {
       case "Modern": return "font-sans font-bold tracking-[0.3em]";
       case "Classic": return "font-serif italic font-semibold tracking-widest";
       default: return "font-serif font-bold tracking-widest";
@@ -56,13 +56,13 @@ export default function Customizer() {
 
       {/* Layout */}
       <div className="w-full max-w-[1100px] flex flex-col lg:flex-row gap-8">
-        
+
         {/* Left Preview */}
         <div className="flex-[1.2] bg-white border border-gray-100 rounded-[2rem] p-6 flex flex-col shadow-md hover:shadow-xl transition-shadow duration-500">
           <div className="flex-1 bg-gradient-to-b from-[#fdfbf6] to-[#f4f1ea] rounded-[1.5rem] w-full flex items-center justify-center py-8 relative min-h-[440px] overflow-hidden">
-            
+
             {/* Live CSS Sash Render */}
-            <div 
+            <div
               className="relative w-[130px] min-h-[380px] h-fit shadow-2xl flex flex-col items-center justify-center transition-all duration-500"
               style={{
                 backgroundColor: baseColor,
@@ -75,7 +75,7 @@ export default function Customizer() {
                 borderTopRightRadius: '6px'
               }}
             >
-              <div 
+              <div
                 className={`text-[#c19b38] text-[1.6rem] leading-none flex flex-col items-center justify-center gap-1 transition-all duration-300 drop-shadow-md py-8 ${getFontFamily()}`}
                 style={{ writingMode: 'vertical-rl', textOrientation: 'upright' }}
               >
@@ -84,7 +84,7 @@ export default function Customizer() {
             </div>
 
           </div>
-          
+
           <div className="flex items-center justify-between mt-6 px-4 text-[14px]">
             <div className="text-gray-500">
               Selected Item: <span className="font-bold text-gray-900">Custom Graduation Sash</span>
@@ -97,13 +97,13 @@ export default function Customizer() {
 
         {/* Right Controls */}
         <div className="flex-1 bg-white border border-gray-100 rounded-[2rem] p-6 lg:p-8 flex flex-col gap-5 shadow-md">
-          
+
           {/* Base Color Select */}
           <div className="flex flex-col gap-2">
             <label className="text-[#c19b38] text-[10.5px] font-bold tracking-widest uppercase">1. BASE COLOR</label>
             <div className="relative flex flex-wrap gap-4">
               {baseColors.map(c => (
-                <button 
+                <button
                   key={c.name}
                   onClick={() => setBaseColor(c.hex)}
                   className={`w-9 h-9 rounded-full border-[3px] transition-all duration-200 ${baseColor === c.hex ? 'border-[#c19b38] scale-110 shadow-md' : 'border-transparent hover:scale-105 shadow-sm'}`}
@@ -119,7 +119,7 @@ export default function Customizer() {
             <label className="text-[#c19b38] text-[10.5px] font-bold tracking-widest uppercase">2. SINGLE BORDER COLOR</label>
             <div className="relative flex flex-wrap gap-4">
               {singleBorderColors.map(c => (
-                <button 
+                <button
                   key={c.name}
                   onClick={() => setSingleBorderColor(c.hex)}
                   className={`w-9 h-9 rounded-full border-[3px] transition-all duration-200 ${singleBorderColor === c.hex ? 'border-[#c19b38] scale-110 shadow-md' : 'border-transparent hover:scale-105 shadow-sm'}`}
@@ -135,7 +135,7 @@ export default function Customizer() {
             <label className="text-[#c19b38] text-[10.5px] font-bold tracking-widest uppercase">3. DOUBLE BORDER COLOR</label>
             <div className="relative flex flex-wrap gap-4 items-center">
               {doubleBorderColors.map(c => (
-                <button 
+                <button
                   key={c.name}
                   onClick={() => setDoubleBorderColor(c.hex)}
                   className={`w-9 h-9 rounded-full border-[3px] transition-all duration-200 flex items-center justify-center ${doubleBorderColor === c.hex ? 'border-[#c19b38] scale-110 shadow-md' : 'border-transparent hover:scale-105 shadow-sm'}`}
@@ -151,8 +151,8 @@ export default function Customizer() {
           {/* Text Input */}
           <div className="flex flex-col gap-2">
             <label className="text-[#c19b38] text-[10.5px] font-bold tracking-widest uppercase">4. EMBROIDERY TEXT</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Enter custom text..."
@@ -165,7 +165,7 @@ export default function Customizer() {
             <label className="text-[#c19b38] text-[10.5px] font-bold tracking-widest uppercase">5. FONT STYLE</label>
             <div className="flex gap-3">
               {['Serif', 'Modern', 'Classic'].map(f => (
-                <button 
+                <button
                   key={f}
                   onClick={() => setFontStyle(f)}
                   className={`flex-1 rounded-[12px] py-2.5 text-sm transition-all duration-200 ${fontStyle === f ? 'bg-gray-900 border border-gray-900 text-white shadow-md font-bold' : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-400 font-medium'}`}
