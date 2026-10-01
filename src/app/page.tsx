@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { Crown, Wand2, ArrowRight, Ribbon, GraduationCap, Shirt, ShoppingBag, Flag } from "lucide-react";
+import Customizer from "@/components/Customizer/Customizer";
 
 export default function Home() {
   return (
@@ -83,7 +84,7 @@ export default function Home() {
       </div>
 
       {/* Categories Section */}
-      <section className="w-full max-w-[1400px] mx-auto px-8 md:px-16 py-24 flex flex-col items-center">
+      <section className="w-full max-w-[1400px] mx-auto px-8 md:px-16 pt-12 pb-16 flex flex-col items-center">
         {/* Heading */}
         <div className="text-center mb-14">
           <h3 className="text-[#b8860b] text-[11px] font-bold tracking-widest uppercase mb-4">ARTISANAL OFFERINGS</h3>
@@ -139,6 +140,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Live Customizer Studio Section */}
+      <Customizer />
     </main>
   );
 }
