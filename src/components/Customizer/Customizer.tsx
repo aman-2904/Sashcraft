@@ -9,6 +9,49 @@ export default function Customizer() {
   const [doubleBorderColor, setDoubleBorderColor] = useState("#d7be82");
   const [text, setText] = useState("CLASS OF 2026");
   const [fontStyle, setFontStyle] = useState("Serif"); // Serif, Modern, Classic
+  const [openPicker, setOpenPicker] = useState<string | null>(null);
+
+  // Extended color palette for the grid
+  const extendedPalette = [
+    // Greys/Neutrals
+    "#ffffff", "#f2f2f2", "#d9d9d9", "#bfbfbf", "#a6a6a6", "#737373", "#404040", "#000000",
+    // Reds
+    "#ffebeb", "#ffc2c2", "#ff9999", "#ff4d4d", "#ff0000", "#cc0000", "#990000", "#660000",
+    // Oranges
+    "#fff0e6", "#ffcc99", "#ffa366", "#ff7733", "#ff5500", "#cc4400", "#993300", "#662200",
+    // Yellows
+    "#ffffe6", "#ffffb3", "#ffff80", "#ffff4d", "#ffff00", "#cccc00", "#999900", "#666600",
+    // Greens
+    "#e6ffe6", "#99ff99", "#4dff4d", "#00ff00", "#00cc00", "#009900", "#006600", "#003300",
+    // Cyans/Teals
+    "#e6ffff", "#99ffff", "#4dffff", "#00ffff", "#00cccc", "#009999", "#006666", "#003333",
+    // Blues
+    "#e6f0ff", "#b3d1ff", "#80b3ff", "#4d94ff", "#1a75ff", "#005ce6", "#0044cc", "#002266",
+    // Purples
+    "#f2e6ff", "#d9b3ff", "#bf80ff", "#a64dff", "#8c1aff", "#7300e6", "#5900b3", "#400080",
+    // Pinks
+    "#ffe6f2", "#ffb3d9", "#ff80bf", "#ff4da6", "#ff1a8c", "#e60073", "#b30059", "#800040",
+  ];
+
+  const renderPalette = (onSelect: (color: string) => void, id: string) => {
+    if (openPicker !== id) return null;
+    return (
+      <div className="absolute top-12 left-0 z-50 bg-white p-3 rounded-xl shadow-2xl border border-gray-100 grid grid-cols-8 gap-1 w-max">
+        {extendedPalette.map(color => (
+          <button 
+            key={color}
+            onClick={(e) => { 
+              e.stopPropagation();
+              onSelect(color); 
+              setOpenPicker(null); 
+            }}
+            className="w-5 h-5 rounded-[3px] hover:scale-125 transition-transform shadow-sm border border-black/5"
+            style={{ backgroundColor: color }}
+          />
+        ))}
+      </div>
+    );
+  };
 
   // Base colors mapping
   const baseColors = [
@@ -112,16 +155,14 @@ export default function Customizer() {
                 />
               ))}
               <div className="relative w-9 h-9 group">
-                <input 
-                  type="color" 
-                  value={baseColor}
-                  onChange={(e) => setBaseColor(e.target.value)}
-                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                <button 
+                  onClick={() => setOpenPicker(openPicker === 'base' ? null : 'base')}
+                  className="absolute inset-0 flex items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-gray-400 group-hover:border-[#c19b38] group-hover:text-[#c19b38] transition-colors bg-white outline-none focus:outline-none z-10"
                   title="Pick custom base color"
-                />
-                <div className="absolute inset-0 flex items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-gray-400 group-hover:border-[#c19b38] group-hover:text-[#c19b38] transition-colors bg-white">
+                >
                   <Plus size={16} strokeWidth={2.5} />
-                </div>
+                </button>
+                {renderPalette(setBaseColor, 'base')}
               </div>
             </div>
           </div>
@@ -140,16 +181,14 @@ export default function Customizer() {
                 />
               ))}
               <div className="relative w-9 h-9 group">
-                <input 
-                  type="color" 
-                  value={singleBorderColor}
-                  onChange={(e) => setSingleBorderColor(e.target.value)}
-                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                <button 
+                  onClick={() => setOpenPicker(openPicker === 'single' ? null : 'single')}
+                  className="absolute inset-0 flex items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-gray-400 group-hover:border-[#c19b38] group-hover:text-[#c19b38] transition-colors bg-white outline-none focus:outline-none z-10"
                   title="Pick custom single border color"
-                />
-                <div className="absolute inset-0 flex items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-gray-400 group-hover:border-[#c19b38] group-hover:text-[#c19b38] transition-colors bg-white">
+                >
                   <Plus size={16} strokeWidth={2.5} />
-                </div>
+                </button>
+                {renderPalette(setSingleBorderColor, 'single')}
               </div>
             </div>
           </div>
@@ -170,16 +209,14 @@ export default function Customizer() {
                 </button>
               ))}
               <div className="relative w-9 h-9 group">
-                <input 
-                  type="color" 
-                  value={doubleBorderColor === 'transparent' ? '#ffffff' : doubleBorderColor}
-                  onChange={(e) => setDoubleBorderColor(e.target.value)}
-                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                <button 
+                  onClick={() => setOpenPicker(openPicker === 'double' ? null : 'double')}
+                  className="absolute inset-0 flex items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-gray-400 group-hover:border-[#c19b38] group-hover:text-[#c19b38] transition-colors bg-white outline-none focus:outline-none z-10"
                   title="Pick custom double border color"
-                />
-                <div className="absolute inset-0 flex items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-gray-400 group-hover:border-[#c19b38] group-hover:text-[#c19b38] transition-colors bg-white">
+                >
                   <Plus size={16} strokeWidth={2.5} />
-                </div>
+                </button>
+                {renderPalette(setDoubleBorderColor, 'double')}
               </div>
             </div>
           </div>
