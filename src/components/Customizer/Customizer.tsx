@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShoppingCart, Plus } from "lucide-react";
+import { ShoppingCart, Plus, X } from "lucide-react";
 
 export default function Customizer() {
   const [baseColor, setBaseColor] = useState("#111111");
@@ -59,19 +59,30 @@ export default function Customizer() {
   const renderPalette = (onSelect: (color: string) => void, id: string) => {
     if (openPicker !== id) return null;
     return (
-      <div className="absolute top-12 left-0 z-50 bg-white p-3 rounded-xl shadow-2xl border border-gray-100 grid grid-cols-8 gap-1 w-max">
-        {extendedPalette.map(color => (
-          <button
-            key={color}
-            onClick={(e) => {
-              e.stopPropagation();
-              onSelect(color);
-              setOpenPicker(null);
-            }}
-            className="w-5 h-5 rounded-[3px] hover:scale-125 transition-transform shadow-sm border border-black/5"
-            style={{ backgroundColor: color }}
-          />
-        ))}
+      <div className="absolute top-12 left-0 z-50 bg-white p-3 pt-2 rounded-xl shadow-2xl border border-gray-100 w-max flex flex-col gap-2">
+        <div className="flex justify-between items-center w-full">
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Colors</span>
+          <button 
+            onClick={(e) => { e.stopPropagation(); setOpenPicker(null); }}
+            className="text-gray-400 hover:text-gray-700 transition-colors p-1 rounded hover:bg-gray-100"
+          >
+            <X size={14} strokeWidth={2.5} />
+          </button>
+        </div>
+        <div className="grid grid-cols-8 gap-1">
+          {extendedPalette.map(color => (
+            <button
+              key={color}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelect(color);
+                setOpenPicker(null);
+              }}
+              className="w-5 h-5 rounded-[3px] hover:scale-125 transition-transform shadow-sm border border-black/5"
+              style={{ backgroundColor: color }}
+            />
+          ))}
+        </div>
       </div>
     );
   };
@@ -79,8 +90,16 @@ export default function Customizer() {
   const renderFontPalette = () => {
     if (openPicker !== 'font') return null;
     return (
-      <div className="absolute bottom-full right-0 mb-2 z-50 bg-white p-2 rounded-xl shadow-2xl border border-gray-100 flex flex-col gap-1 w-48 max-h-60 overflow-y-auto">
-        <div className="text-[10px] font-bold text-gray-400 px-3 py-1 uppercase tracking-widest">More Fonts</div>
+      <div className="absolute bottom-full right-0 mb-2 z-50 bg-white p-2 pb-3 rounded-xl shadow-2xl border border-gray-100 flex flex-col gap-1 w-56 max-h-[18rem] overflow-y-auto">
+        <div className="flex justify-between items-center sticky top-0 bg-white/95 backdrop-blur-sm z-10 pt-1 pb-2 mb-1 border-b border-gray-50 px-2">
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">More Fonts</span>
+          <button 
+            onClick={(e) => { e.stopPropagation(); setOpenPicker(null); }}
+            className="text-gray-400 hover:text-gray-700 transition-colors p-1 rounded hover:bg-gray-100"
+          >
+            <X size={14} strokeWidth={2.5} />
+          </button>
+        </div>
         {extendedFonts.map(font => (
           <button
             key={font.name}
