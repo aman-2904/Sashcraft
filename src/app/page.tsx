@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Crown, Wand2, ArrowRight, Ribbon, GraduationCap, Shirt, ShoppingBag, Flag, Gem, PenLine, Plane, Package } from "lucide-react";
+import { Crown, Wand2, ArrowRight, Ribbon, GraduationCap, Shirt, ShoppingBag, Flag, Gem, PenLine, Plane, Package, Star } from "lucide-react";
 import Customizer from "@/components/Customizer/Customizer";
 
 export default function Home() {
@@ -192,6 +192,87 @@ export default function Home() {
             </div>
           </div>
 
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="w-full bg-[#fdfbfb] px-8 md:px-16 py-20 flex flex-col items-center">
+        {/* Heading */}
+        <div className="text-center mb-14">
+          <h3 className="text-[#b8860b] text-[11px] font-bold tracking-widest uppercase mb-4">CLIENT TESTIMONIALS</h3>
+          <h2 className="text-4xl md:text-[2.75rem] font-serif font-bold text-gray-900 tracking-tight">Trusted by Graduates & Organizations</h2>
+        </div>
+
+        {/* Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-[1200px]">
+          {/* Card 1 */}
+          <div className="bg-white rounded-[24px] p-8 shadow-sm border border-gray-100 flex flex-col justify-between transition-all hover:shadow-md hover:-translate-y-1">
+            <div>
+              <div className="flex gap-1 mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={18} fill="#c19b38" stroke="none" />
+                ))}
+              </div>
+              <p className="text-gray-500 italic leading-relaxed text-[15px] mb-8">
+                "The graduation sashes for our honor society turned out phenomenal! The gold embroidery on royal navy was vibrant and crisp."
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-[#111111] text-white flex items-center justify-center font-bold text-sm">
+                ES
+              </div>
+              <div className="flex flex-col">
+                <span className="font-bold text-gray-900 text-sm">Dr. Elena Rostova</span>
+                <span className="text-xs text-gray-400 font-medium">University Event Director</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div className="bg-white rounded-[24px] p-8 shadow-sm border border-gray-100 flex flex-col justify-between transition-all hover:shadow-md hover:-translate-y-1">
+            <div>
+              <div className="flex gap-1 mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={18} fill="#c19b38" stroke="none" />
+                ))}
+              </div>
+              <p className="text-gray-500 italic leading-relaxed text-[15px] mb-8">
+                "Ordered 200 custom eco jute bags for our eco-summit. Exceptional print quality and delivered well ahead of schedule."
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-[#14532d] text-white flex items-center justify-center font-bold text-sm">
+                MK
+              </div>
+              <div className="flex flex-col">
+                <span className="font-bold text-gray-900 text-sm">Marcus Sterling</span>
+                <span className="text-xs text-gray-400 font-medium">Corporate Brand Manager</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div className="bg-white rounded-[24px] p-8 shadow-sm border border-gray-100 flex flex-col justify-between transition-all hover:shadow-md hover:-translate-y-1">
+            <div>
+              <div className="flex gap-1 mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={18} fill="#c19b38" stroke="none" />
+                ))}
+              </div>
+              <p className="text-gray-500 italic leading-relaxed text-[15px] mb-8">
+                "The Live Customizer Studio made designing my pageant stole so effortless! The font preview was accurate to the final product."
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-[#d97706] text-white flex items-center justify-center font-bold text-sm">
+                CL
+              </div>
+              <div className="flex flex-col">
+                <span className="font-bold text-gray-900 text-sm">Clara Laurent</span>
+                <span className="text-xs text-gray-400 font-medium">Pageant Winner 2025</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </main>
