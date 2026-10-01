@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Crown, Wand2, ArrowRight, Ribbon, GraduationCap, Shirt, ShoppingBag, Flag, Gem, PenLine, Plane, Package, Star } from "lucide-react";
+import { Crown, Wand2, ArrowRight, Ribbon, GraduationCap, Shirt, ShoppingBag, Flag, Gem, PenLine, Plane, Package, Star, MapPin, Mail, Phone } from "lucide-react";
 import Customizer from "@/components/Customizer/Customizer";
 
 export default function Home() {
@@ -273,6 +273,93 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Contact Us Section */}
+      <section className="w-full bg-[#f4f1ea] px-8 md:px-16 py-20 flex justify-center">
+        <div className="max-w-[1200px] w-full flex flex-col lg:flex-row items-center gap-16">
+          
+          {/* Left Side: Info */}
+          <div className="flex-1 flex flex-col">
+            <h3 className="text-[#b8860b] text-[11px] font-bold tracking-widest uppercase mb-4">GET IN TOUCH</h3>
+            <h2 className="text-4xl md:text-[3rem] font-serif font-bold text-gray-900 mb-6 leading-[1.1] tracking-tight">
+              Need Bulk Orders or Custom Specifications?
+            </h2>
+            <p className="text-gray-600 text-[15px] leading-relaxed mb-10 max-w-lg">
+              Whether you need custom sashes for a university cohort, corporate tote bags, aprons, or specialized flags, our consultants are ready to assist.
+            </p>
+
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white rounded-[14px] flex items-center justify-center text-[#c19b38] shadow-sm border border-gray-100 shrink-0">
+                  <MapPin size={20} strokeWidth={2.5} />
+                </div>
+                <span className="text-gray-600 text-[14px] font-medium">Artisan Craft Studio, 104 Silk & Textile Way, Artisan District</span>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white rounded-[14px] flex items-center justify-center text-[#c19b38] shadow-sm border border-gray-100 shrink-0">
+                  <Mail size={20} strokeWidth={2.5} />
+                </div>
+                <span className="text-gray-600 text-[14px] font-medium">support@sashcraft.com</span>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white rounded-[14px] flex items-center justify-center text-[#c19b38] shadow-sm border border-gray-100 shrink-0">
+                  <Phone size={20} strokeWidth={2.5} />
+                </div>
+                <span className="text-gray-600 text-[14px] font-medium">+1 (800) 555-SASH (7274)</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side: Form */}
+          <div className="flex-[1.2] w-full max-w-lg lg:max-w-none">
+            <div className="bg-white rounded-[24px] p-8 md:p-10 shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-gray-100">
+              <h3 className="text-2xl font-serif font-bold text-gray-900 mb-8 tracking-tight">Request a Custom Quote</h3>
+              
+              <form className="flex flex-col gap-5">
+                <div className="flex flex-col md:flex-row gap-5">
+                  <div className="flex flex-col gap-2 flex-1">
+                    <label className="text-[12px] font-bold text-gray-700">Full Name</label>
+                    <input type="text" placeholder="John Doe" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#c19b38] focus:ring-1 focus:ring-[#c19b38] transition-all bg-gray-50/50" />
+                  </div>
+                  <div className="flex flex-col gap-2 flex-1">
+                    <label className="text-[12px] font-bold text-gray-700">Email Address</label>
+                    <input type="email" placeholder="john@university.edu" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#c19b38] focus:ring-1 focus:ring-[#c19b38] transition-all bg-gray-50/50" />
+                  </div>
+                </div>
+
+                <div className="flex flex-col md:flex-row gap-5">
+                  <div className="flex flex-col gap-2 flex-[1.5]">
+                    <label className="text-[12px] font-bold text-gray-700">Product Category</label>
+                    <select className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#c19b38] focus:ring-1 focus:ring-[#c19b38] transition-all bg-gray-50/50 appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23131313%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:10px_10px] bg-no-repeat bg-[position:right_1rem_center] text-gray-700">
+                      <option>Graduation Sashes & Stoles</option>
+                      <option>Academic Gowns & Caps</option>
+                      <option>Eco Jute & Canvas Bags</option>
+                      <option>Custom Flags & Banners</option>
+                      <option>Aprons & T-Shirts</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-2 flex-1">
+                    <label className="text-[12px] font-bold text-gray-700">Estimated Quantity</label>
+                    <input type="number" placeholder="50" className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#c19b38] focus:ring-1 focus:ring-[#c19b38] transition-all bg-gray-50/50" />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-[12px] font-bold text-gray-700">Custom Notes / Embroidery Details</label>
+                  <textarea placeholder="Specify colors, text, crest requirements or deadline date..." rows={4} className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#c19b38] focus:ring-1 focus:ring-[#c19b38] transition-all bg-gray-50/50 resize-none"></textarea>
+                </div>
+
+                <button type="button" className="w-full bg-[#b8860b] hover:bg-[#a07409] text-white font-bold text-[13px] tracking-wider py-4 rounded-xl mt-2 transition-all shadow-[0_8px_20px_rgba(184,134,11,0.2)] hover:-translate-y-1">
+                  SUBMIT QUOTE REQUEST
+                </button>
+              </form>
+            </div>
+          </div>
+          
         </div>
       </section>
     </main>
