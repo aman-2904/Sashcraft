@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Plus } from "lucide-react";
 
 export default function Customizer() {
   const [baseColor, setBaseColor] = useState("#111111");
@@ -111,6 +111,18 @@ export default function Customizer() {
                   title={c.name}
                 />
               ))}
+              <div className="relative w-9 h-9 group">
+                <input 
+                  type="color" 
+                  value={baseColor}
+                  onChange={(e) => setBaseColor(e.target.value)}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                  title="Pick custom base color"
+                />
+                <div className="absolute inset-0 flex items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-gray-400 group-hover:border-[#c19b38] group-hover:text-[#c19b38] transition-colors bg-white">
+                  <Plus size={16} strokeWidth={2.5} />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -127,6 +139,18 @@ export default function Customizer() {
                   title={c.name}
                 />
               ))}
+              <div className="relative w-9 h-9 group">
+                <input 
+                  type="color" 
+                  value={singleBorderColor}
+                  onChange={(e) => setSingleBorderColor(e.target.value)}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                  title="Pick custom single border color"
+                />
+                <div className="absolute inset-0 flex items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-gray-400 group-hover:border-[#c19b38] group-hover:text-[#c19b38] transition-colors bg-white">
+                  <Plus size={16} strokeWidth={2.5} />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -145,6 +169,18 @@ export default function Customizer() {
                   {c.hex === 'transparent' && <span className="text-[8px] font-bold text-gray-400">NONE</span>}
                 </button>
               ))}
+              <div className="relative w-9 h-9 group">
+                <input 
+                  type="color" 
+                  value={doubleBorderColor === 'transparent' ? '#ffffff' : doubleBorderColor}
+                  onChange={(e) => setDoubleBorderColor(e.target.value)}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                  title="Pick custom double border color"
+                />
+                <div className="absolute inset-0 flex items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-gray-400 group-hover:border-[#c19b38] group-hover:text-[#c19b38] transition-colors bg-white">
+                  <Plus size={16} strokeWidth={2.5} />
+                </div>
+              </div>
             </div>
           </div>
 
