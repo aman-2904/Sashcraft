@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ShoppingCart } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 
 export default function Customizer() {
   const [baseColor, setBaseColor] = useState("#111111");
