@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Crown, Wand2, ArrowRight, Ribbon, GraduationCap, Shirt, ShoppingBag, Flag } from "lucide-react";
+import { Crown, Wand2, ArrowRight, Ribbon, GraduationCap, Shirt, ShoppingBag, Flag, Gem, PenLine, Plane, Package } from "lucide-react";
 import Customizer from "@/components/Customizer/Customizer";
 
 export default function Home() {
@@ -143,6 +143,57 @@ export default function Home() {
 
       {/* Live Customizer Studio Section */}
       <Customizer />
+
+      {/* Features Section */}
+      <section className="w-full bg-[#f9f8f6] px-8 md:px-16 py-16 flex justify-center">
+        <div className="max-w-[1400px] w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          
+          {/* Card 1 */}
+          <div className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm border border-gray-100 transition-all hover:shadow-md hover:-translate-y-1">
+            <div className="w-12 h-12 shrink-0 bg-[#fdfaf2] rounded-xl flex items-center justify-center text-[#c19b38]">
+              <Gem size={24} strokeWidth={2.5} />
+            </div>
+            <div className="flex flex-col">
+              <h4 className="text-gray-900 font-bold mb-1 text-[15px]">Premium Fabrics</h4>
+              <p className="text-[13px] text-gray-500 leading-relaxed font-medium">High-grade satin, organic cotton, and heavy-duty jute.</p>
+            </div>
+          </div>
+
+          {/* Card 2 */}
+          <div className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm border border-gray-100 transition-all hover:shadow-md hover:-translate-y-1">
+            <div className="w-12 h-12 shrink-0 bg-[#fdfaf2] rounded-xl flex items-center justify-center text-[#c19b38]">
+              <PenLine size={24} strokeWidth={2.5} />
+            </div>
+            <div className="flex flex-col">
+              <h4 className="text-gray-900 font-bold mb-1 text-[15px]">Precision Embroidery</h4>
+              <p className="text-[13px] text-gray-500 leading-relaxed font-medium">State-of-the-art stitching for sharp crests and letters.</p>
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm border border-gray-100 transition-all hover:shadow-md hover:-translate-y-1">
+            <div className="w-12 h-12 shrink-0 bg-[#fdfaf2] rounded-xl flex items-center justify-center text-[#c19b38]">
+              <Plane size={24} strokeWidth={2.5} />
+            </div>
+            <div className="flex flex-col">
+              <h4 className="text-gray-900 font-bold mb-1 text-[15px]">Express Delivery</h4>
+              <p className="text-[13px] text-gray-500 leading-relaxed font-medium">Fast worldwide shipping options for event deadlines.</p>
+            </div>
+          </div>
+
+          {/* Card 4 */}
+          <div className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm border border-gray-100 transition-all hover:shadow-md hover:-translate-y-1">
+            <div className="w-12 h-12 shrink-0 bg-[#fdfaf2] rounded-xl flex items-center justify-center text-[#c19b38]">
+              <Package size={24} strokeWidth={2.5} />
+            </div>
+            <div className="flex flex-col">
+              <h4 className="text-gray-900 font-bold mb-1 text-[15px]">Low MOQ & Bulk Discounts</h4>
+              <p className="text-[13px] text-gray-500 leading-relaxed font-medium">Single custom pieces or scaled orders for institutes.</p>
+            </div>
+          </div>
+
+        </div>
+      </section>
     </main>
   );
 }
