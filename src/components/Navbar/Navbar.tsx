@@ -5,6 +5,7 @@ import { Search, Heart, ShoppingBag, Send, ChevronDown, Ribbon, Menu, X } from '
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileCategoriesOpen, setIsMobileCategoriesOpen] = useState(false);
 
   return (
     <div className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-[1400px] z-50">
@@ -25,8 +26,19 @@ export default function Navbar() {
           <li className="group text-[15px] font-semibold text-[#b8860b] cursor-pointer flex items-center gap-1.5 transition-all duration-300 relative after:content-[''] after:absolute after:w-full after:h-0.5 after:-bottom-1 after:left-0 after:bg-[#b8860b] after:transition-all after:duration-300">
             Home
           </li>
-          <li className="group text-[15px] font-semibold text-gray-800 hover:text-[#b8860b] cursor-pointer flex items-center gap-1.5 transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:-bottom-1 after:left-0 after:bg-[#b8860b] after:transition-all after:duration-300 group-hover:after:w-full">
-            Categories <ChevronDown size={16} />
+          <li className="group text-[15px] font-semibold text-gray-800 hover:text-[#b8860b] cursor-pointer flex items-center gap-1.5 transition-all duration-300 relative py-2 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-[#b8860b] after:transition-all after:duration-300 group-hover:after:w-full">
+            Categories <ChevronDown size={16} className="transition-transform duration-300 group-hover:rotate-180" />
+
+            {/* Desktop Dropdown */}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 w-60 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+              <div className="bg-white border border-gray-100 rounded-2xl shadow-xl flex flex-col p-2">
+                <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Graduation Sashes</a>
+                <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Gowns & Caps</a>
+                <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Custom Aprons & Tees</a>
+                <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Jute & Tote Bags</a>
+                <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Flags</a>
+              </div>
+            </div>
           </li>
           <li className="group text-[15px] font-semibold text-gray-800 hover:text-[#b8860b] cursor-pointer flex items-center gap-1.5 transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:-bottom-1 after:left-0 after:bg-[#b8860b] after:transition-all after:duration-300 group-hover:after:w-full">
             🪄 Customizer Studio
@@ -61,7 +73,7 @@ export default function Navbar() {
 
         {/* Mobile Menu Button */}
         <div className="lg:hidden flex items-center">
-          <button 
+          <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="text-gray-800 hover:text-[#b8860b] transition-colors p-2"
           >
@@ -75,7 +87,25 @@ export default function Navbar() {
         <div className="absolute top-full left-0 w-full mt-4 bg-white border border-gray-100 rounded-3xl p-6 shadow-2xl lg:hidden flex flex-col gap-6 animate-in slide-in-from-top-4 fade-in duration-200">
           <ul className="flex flex-col gap-5">
             <li className="text-[17px] font-bold text-[#b8860b] border-b border-gray-100 pb-3">Home</li>
-            <li className="text-[17px] font-bold text-gray-800 border-b border-gray-100 pb-3 flex justify-between">Categories <ChevronDown size={20} /></li>
+            <li className="border-b border-gray-100 pb-3">
+              <div
+                className="flex justify-between items-center text-[17px] font-bold text-gray-800 cursor-pointer"
+                onClick={() => setIsMobileCategoriesOpen(!isMobileCategoriesOpen)}
+              >
+                Categories <ChevronDown size={20} className={`transition-transform duration-300 ${isMobileCategoriesOpen ? 'rotate-180' : ''}`} />
+              </div>
+
+              {/* Mobile Accordion */}
+              {isMobileCategoriesOpen && (
+                <ul className="flex flex-col gap-3 mt-4 pl-4 border-l-2 border-[#b8860b]/20 animate-in slide-in-from-top-2 fade-in duration-200">
+                  <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1">Graduation Sashes</a></li>
+                  <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1">Gowns & Caps</a></li>
+                  <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1">Custom Aprons & Tees</a></li>
+                  <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1">Jute & Tote Bags</a></li>
+                  <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1">Flags</a></li>
+                </ul>
+              )}
+            </li>
             <li className="text-[17px] font-bold text-gray-800 border-b border-gray-100 pb-3">🪄 Customizer Studio</li>
             <li className="text-[17px] font-bold text-gray-800 border-b border-gray-100 pb-3">About Us</li>
             <li className="text-[17px] font-bold text-gray-800 border-b border-gray-100 pb-3">Contact</li>
