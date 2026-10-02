@@ -7,10 +7,10 @@ export default function Footer() {
       <footer className="relative w-full bg-[#111111] rounded-[30px] md:rounded-[40px] overflow-hidden pt-16 md:pt-24 flex flex-col justify-between">
 
         <div className="max-w-[1400px] mx-auto px-8 md:px-16 w-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16 relative z-10">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-12 lg:gap-8 mb-16 relative z-10">
 
             {/* Brand Info */}
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6 col-span-2 lg:col-span-1">
               <div className="flex items-center gap-3">
                 <div className="bg-transparent border border-white/20 p-2 rounded-lg text-white">
                   <Ribbon size={24} strokeWidth={2} />
@@ -47,7 +47,7 @@ export default function Footer() {
             </div>
 
             {/* Follow Us */}
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6 col-span-2 lg:col-span-1">
               <h4 className="font-bold text-[#b8860b] text-[12px] tracking-widest uppercase mb-2">Follow Us</h4>
               <div className="flex items-center gap-3">
                 <a href="#" className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:bg-[#b8860b] hover:text-white hover:border-[#b8860b] transition-all">
