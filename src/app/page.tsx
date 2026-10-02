@@ -6,81 +6,81 @@ export default function Home() {
   return (
     <main className="flex flex-col w-full min-h-screen bg-[#fdfbfb]">
       {/* Hero Section */}
-      <div className="w-full bg-gradient-to-br from-[#fdfbfb] to-[#f4f1ea] pt-32 pb-16 px-8 md:px-16 overflow-hidden">
-      <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-16 relative">
+      <div className="w-full bg-gradient-to-br from-[#fdfbfb] to-[#f4f1ea] pt-4 md:pt-16 pb-16 px-8 md:px-16 overflow-hidden">
+        <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-16 relative">
 
-        {/* Left Side: Content */}
-        <div className="flex-1 flex flex-col items-start z-10">
-          {/* Badge */}
-          <div className="flex items-center gap-2 bg-white border border-[#dfad2d]/30 text-[#b8860b] px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase mb-8 shadow-sm">
-            <Crown size={14} strokeWidth={2.5} />
-            HANDCRAFTED ARTISANAL EXCELLENCE
-          </div>
-
-          {/* Headline */}
-          <h1 className="text-[4rem] lg:text-[4.5rem] font-bold leading-[1.1] mb-6 font-serif">
-            <span className="text-[#1a1a1a]">Crafting Memories</span><br />
-            <span className="text-[#c19b38]">In Every Thread</span>
-          </h1>
-
-          {/* Paragraph */}
-          <p className="text-gray-600 text-[1.1rem] leading-relaxed max-w-xl mb-10">
-            SashCraft designs bespoke sashes, ceremonial stoles, academic gowns, eco totes, custom flags, aprons, caps, and custom apparel designed for your finest milestones.
-          </p>
-
-          {/* Buttons */}
-          <div className="flex items-center gap-5 mb-16">
-            <button className="bg-[#b8860b] hover:bg-[#a07409] text-white px-8 py-4 rounded-xl font-bold text-sm tracking-wide flex items-center gap-2 transition-all shadow-[0_8px_20px_rgba(184,134,11,0.3)] hover:-translate-y-1">
-              <Wand2 size={18} strokeWidth={2.5} />
-              LAUNCH CUSTOMIZER STUDIO
-            </button>
-            <button className="bg-white hover:bg-gray-50 text-gray-900 border border-gray-200 px-8 py-4 rounded-xl font-bold text-sm tracking-wide flex items-center gap-2 transition-all shadow-sm hover:-translate-y-1">
-              Explore Collection
-              <ArrowRight size={18} />
-            </button>
-          </div>
-
-          {/* Stats Row */}
-          <div className="flex items-center gap-12 border-t border-gray-200/60 pt-8 w-full max-w-xl">
-            <div className="flex flex-col">
-              <span className="text-3xl font-serif font-bold text-[#b8860b]">50K<span className="text-[#dfad2d] text-2xl">+</span></span>
-              <span className="text-xs text-gray-500 font-semibold mt-1">Sashes Handcrafted</span>
+          {/* Left Side: Content */}
+          <div className="flex-1 flex flex-col items-start z-10">
+            {/* Badge */}
+            <div className="flex items-center gap-2 bg-white border border-[#dfad2d]/30 text-[#b8860b] px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase mb-8 shadow-sm">
+              <Crown size={14} strokeWidth={2.5} />
+              HANDCRAFTED ARTISANAL EXCELLENCE
             </div>
-            <div className="flex flex-col">
-              <span className="text-3xl font-serif font-bold text-[#b8860b]">99.8<span className="text-[#dfad2d] text-2xl">%</span></span>
-              <span className="text-xs text-gray-500 font-semibold mt-1">Satisfaction Rate</span>
+
+            {/* Headline */}
+            <h1 className="text-[4rem] lg:text-[4.5rem] font-bold leading-[1.1] mb-6 font-serif">
+              <span className="text-[#1a1a1a]">Crafting Memories</span><br />
+              <span className="text-[#c19b38]">In Every Thread</span>
+            </h1>
+
+            {/* Paragraph */}
+            <p className="text-gray-600 text-[1.1rem] leading-relaxed max-w-xl mb-10">
+              SashCraft designs bespoke sashes, ceremonial stoles, academic gowns, eco totes, custom flags, aprons, caps, and custom apparel designed for your finest milestones.
+            </p>
+
+            {/* Buttons */}
+            <div className="flex items-center gap-5 mb-16">
+              <button className="bg-[#b8860b] hover:bg-[#a07409] text-white px-8 py-4 rounded-xl font-bold text-sm tracking-wide flex items-center gap-2 transition-all shadow-[0_8px_20px_rgba(184,134,11,0.3)] hover:-translate-y-1">
+                <Wand2 size={18} strokeWidth={2.5} />
+                LAUNCH CUSTOMIZER STUDIO
+              </button>
+              <button className="bg-white hover:bg-gray-50 text-gray-900 border border-gray-200 px-8 py-4 rounded-xl font-bold text-sm tracking-wide flex items-center gap-2 transition-all shadow-sm hover:-translate-y-1">
+                Explore Collection
+                <ArrowRight size={18} />
+              </button>
             </div>
-            <div className="flex flex-col">
-              <span className="text-3xl font-serif font-bold text-[#b8860b]">120<span className="text-[#dfad2d] text-2xl">+</span></span>
-              <span className="text-xs text-gray-500 font-semibold mt-1">University Partners</span>
-            </div>
-          </div>
-        </div>
 
-        {/* Right Side: Image Card */}
-        <div className="flex-1 relative w-full max-w-lg z-10 flex justify-end">
-          <div className="bg-white/40 backdrop-blur-3xl rounded-[40px] p-4 w-full h-[550px] border border-white/60 shadow-[0_20px_50px_rgba(0,0,0,0.05)] relative flex flex-col items-center justify-center overflow-hidden">
-
-            {/* Inner background frame */}
-            <div className="absolute inset-4 bg-[#fcfbfa] rounded-[28px] border border-white"></div>
-
-            {/* Generated Sash Image */}
-            <div className="relative z-10 w-[90%] h-[90%] flex items-center justify-center">
-              <div className="relative w-full h-full transform hover:scale-105 transition-transform duration-700 ease-in-out">
-                <Image
-                  src="/hero-sash.jpg"
-                  alt="Custom Satin Honor Stole"
-                  fill
-                  style={{ objectFit: 'contain' }}
-                  className="drop-shadow-2xl"
-                  priority
-                />
+            {/* Stats Row */}
+            <div className="flex items-center gap-12 border-t border-gray-200/60 pt-8 w-full max-w-xl">
+              <div className="flex flex-col">
+                <span className="text-3xl font-serif font-bold text-[#b8860b]">50K<span className="text-[#dfad2d] text-2xl">+</span></span>
+                <span className="text-xs text-gray-500 font-semibold mt-1">Sashes Handcrafted</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-3xl font-serif font-bold text-[#b8860b]">99.8<span className="text-[#dfad2d] text-2xl">%</span></span>
+                <span className="text-xs text-gray-500 font-semibold mt-1">Satisfaction Rate</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-3xl font-serif font-bold text-[#b8860b]">120<span className="text-[#dfad2d] text-2xl">+</span></span>
+                <span className="text-xs text-gray-500 font-semibold mt-1">University Partners</span>
               </div>
             </div>
           </div>
-        </div>
 
-      </div>
+          {/* Right Side: Image Card */}
+          <div className="flex-1 relative w-full max-w-lg z-10 flex justify-end">
+            <div className="bg-white/40 backdrop-blur-3xl rounded-[40px] p-4 w-full h-[550px] border border-white/60 shadow-[0_20px_50px_rgba(0,0,0,0.05)] relative flex flex-col items-center justify-center overflow-hidden">
+
+              {/* Inner background frame */}
+              <div className="absolute inset-4 bg-[#fcfbfa] rounded-[28px] border border-white"></div>
+
+              {/* Generated Sash Image */}
+              <div className="relative z-10 w-[90%] h-[90%] flex items-center justify-center">
+                <div className="relative w-full h-full transform hover:scale-105 transition-transform duration-700 ease-in-out">
+                  <Image
+                    src="/hero-sash.jpg"
+                    alt="Custom Satin Honor Stole"
+                    fill
+                    style={{ objectFit: 'contain' }}
+                    className="drop-shadow-2xl"
+                    priority
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
 
       {/* Categories Section */}
@@ -147,7 +147,7 @@ export default function Home() {
       {/* Features Section */}
       <section className="w-full bg-[#f9f8f6] px-8 md:px-16 py-16 flex justify-center">
         <div className="max-w-[1400px] w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          
+
           {/* Card 1 */}
           <div className="bg-white rounded-2xl p-6 flex items-start gap-4 shadow-sm border border-gray-100 transition-all hover:shadow-md hover:-translate-y-1">
             <div className="w-12 h-12 shrink-0 bg-[#fdfaf2] rounded-xl flex items-center justify-center text-[#c19b38]">
@@ -279,7 +279,7 @@ export default function Home() {
       {/* Contact Us Section */}
       <section className="w-full bg-[#f4f1ea] px-8 md:px-16 py-20 flex justify-center">
         <div className="max-w-[1200px] w-full flex flex-col lg:flex-row items-center gap-16">
-          
+
           {/* Left Side: Info */}
           <div className="flex-1 flex flex-col">
             <h3 className="text-[#b8860b] text-[11px] font-bold tracking-widest uppercase mb-4">GET IN TOUCH</h3>
@@ -297,7 +297,7 @@ export default function Home() {
                 </div>
                 <span className="text-gray-600 text-[14px] font-medium">Artisan Craft Studio, 104 Silk & Textile Way, Artisan District</span>
               </div>
-              
+
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-white rounded-[14px] flex items-center justify-center text-[#c19b38] shadow-sm border border-gray-100 shrink-0">
                   <Mail size={20} strokeWidth={2.5} />
@@ -318,7 +318,7 @@ export default function Home() {
           <div className="flex-[1.2] w-full max-w-lg lg:max-w-none">
             <div className="bg-white rounded-[24px] p-8 md:p-10 shadow-[0_10px_40px_rgba(0,0,0,0.04)] border border-gray-100">
               <h3 className="text-2xl font-serif font-bold text-gray-900 mb-8 tracking-tight">Request a Custom Quote</h3>
-              
+
               <form className="flex flex-col gap-5">
                 <div className="flex flex-col md:flex-row gap-5">
                   <div className="flex flex-col gap-2 flex-1">
@@ -359,7 +359,7 @@ export default function Home() {
               </form>
             </div>
           </div>
-          
+
         </div>
       </section>
     </main>
