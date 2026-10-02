@@ -24,23 +24,23 @@ export default function Footer() {
               </p>
             </div>
 
-            {/* Quick Links */}
+            {/* Categories */}
             <div className="flex flex-col gap-6 lg:ml-12">
-              <h4 className="font-bold text-[#b8860b] text-[12px] tracking-widest uppercase mb-2">Quick Links</h4>
+              <h4 className="font-bold text-[#b8860b] text-[12px] tracking-widest uppercase mb-2">Categories</h4>
               <ul className="flex flex-col gap-4">
-                <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Home</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Categories</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Customizer Studio</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">About Us</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Graduation Sashes</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Gowns & Caps</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Custom Aprons & Tees</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Jute & Tote Bags</a></li>
               </ul>
             </div>
 
-            {/* Support */}
+            {/* Customer Service */}
             <div className="flex flex-col gap-6">
-              <h4 className="font-bold text-[#b8860b] text-[12px] tracking-widest uppercase mb-2">Support</h4>
+              <h4 className="font-bold text-[#b8860b] text-[12px] tracking-widest uppercase mb-2">Customer Service</h4>
               <ul className="flex flex-col gap-4">
-                <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Contact Us</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">FAQs</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Customizer Studio</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Bulk Quote Request</a></li>
                 <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Shipping & Delivery</a></li>
                 <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Returns Policy</a></li>
               </ul>
