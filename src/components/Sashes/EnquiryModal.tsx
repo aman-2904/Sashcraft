@@ -15,6 +15,7 @@ interface EnquiryModalProps {
   unitPrice: number;
   totalPrice: number;
   discountSaved: number;
+  initialNotes?: string;
 }
 
 export default function EnquiryModal({
@@ -27,6 +28,7 @@ export default function EnquiryModal({
   unitPrice,
   totalPrice,
   discountSaved,
+  initialNotes = '',
 }: EnquiryModalProps) {
   const [formData, setFormData] = useState({
     fullName: '',
@@ -34,8 +36,14 @@ export default function EnquiryModal({
     email: '',
     organization: '',
     eventDate: '',
-    customNotes: '',
+    customNotes: initialNotes || '',
   });
+
+  React.useEffect(() => {
+    if (initialNotes) {
+      setFormData((prev) => ({ ...prev, customNotes: initialNotes }));
+    }
+  }, [initialNotes]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);

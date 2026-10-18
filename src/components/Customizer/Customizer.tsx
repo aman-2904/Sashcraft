@@ -3,9 +3,31 @@
 import { useState } from "react";
 import { ShoppingCart, Plus, X } from "lucide-react";
 
-export default function Customizer() {
-  const [baseColor, setBaseColor] = useState("#111111");
-  const [singleBorderColor, setSingleBorderColor] = useState("#c42323");
+export interface CustomizerProps {
+  productTitle?: string;
+  productPrice?: string;
+  initialBaseColor?: string;
+  initialBorderColor?: string;
+  buttonLabel?: string;
+  onEnquireCustom?: (customDetails: {
+    baseColor: string;
+    singleBorderColor: string;
+    doubleBorderColor: string;
+    text: string;
+    fontStyle: string;
+  }) => void;
+}
+
+export default function Customizer({
+  productTitle,
+  productPrice,
+  initialBaseColor,
+  initialBorderColor,
+  buttonLabel,
+  onEnquireCustom,
+}: CustomizerProps = {}) {
+  const [baseColor, setBaseColor] = useState(initialBaseColor || "#111111");
+  const [singleBorderColor, setSingleBorderColor] = useState(initialBorderColor || "#c42323");
   const [doubleBorderColor, setDoubleBorderColor] = useState("#d7be82");
   const [text, setText] = useState("CLASS OF 2026");
   const [fontStyle, setFontStyle] = useState("Serif"); // Serif, Modern, Classic
@@ -154,7 +176,7 @@ export default function Customizer() {
   const fontProps = getFontFamily();
 
   return (
-    <section className="w-full bg-[#fdfbfb] px-8 md:px-16 pt-8 pb-16 flex flex-col items-center">
+    <section id="customizer-studio" className="w-full bg-[#fdfbfb] px-4 sm:px-8 md:px-16 pt-12 pb-16 flex flex-col items-center">
       {/* Header */}
       <div className="text-center mb-8 flex flex-col items-center">
         <div className="bg-white border border-[#c19b38]/30 text-[#c19b38] px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase mb-6 shadow-sm">
@@ -224,10 +246,10 @@ export default function Customizer() {
 
           <div className="flex items-center justify-between mt-6 px-4 text-[14px]">
             <div className="text-gray-500">
-              Selected Item: <span className="font-bold text-gray-900">Custom Graduation Sash</span>
+              Selected Item: <span className="font-bold text-gray-900">{productTitle || "Custom Graduation Sash"}</span>
             </div>
             <div className="text-gray-500">
-              Estimated Price: <span className="font-bold text-[#c19b38]">$79.00</span>
+              Estimated Price: <span className="font-bold text-[#c19b38]">{productPrice || "₹499.00"}</span>
             </div>
           </div>
         </div>
@@ -357,9 +379,17 @@ export default function Customizer() {
 
           {/* Submit Button */}
           <div className="mt-2 pt-5 border-t border-gray-100 flex flex-col items-center gap-3">
-            <button className="w-full bg-[#b8860b] hover:bg-[#a07409] text-white rounded-xl py-3.5 h-12 font-bold text-[13px] tracking-wide flex items-center justify-center gap-2 transition-all shadow-md hover:-translate-y-0.5 hover:shadow-lg">
+            <button 
+              type="button"
+              onClick={() => {
+                if (onEnquireCustom) {
+                  onEnquireCustom({ baseColor, singleBorderColor, doubleBorderColor, text, fontStyle });
+                }
+              }}
+              className="w-full bg-[#b8860b] hover:bg-[#a07409] text-white rounded-xl py-3.5 h-12 font-bold text-[13px] tracking-wide flex items-center justify-center gap-2 transition-all shadow-md hover:-translate-y-0.5 hover:shadow-lg cursor-pointer"
+            >
               <ShoppingCart size={18} strokeWidth={2.5} />
-              ADD CUSTOM DESIGN TO CART
+              {buttonLabel || "ADD CUSTOM DESIGN TO QUOTE / CART"}
             </button>
           </div>
 

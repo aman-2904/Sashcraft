@@ -27,6 +27,7 @@ import {
 } from '@/data/sashesData';
 import EnquiryModal from '@/components/Sashes/EnquiryModal';
 import AdminConfigDrawer from '@/components/Sashes/AdminConfigDrawer';
+import Customizer from '@/components/Customizer/Customizer';
 
 interface SashProductTemplateProps {
   initialProduct: SashProductConfig;
@@ -44,6 +45,7 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
   const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
   const [isZoomOpen, setIsZoomOpen] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'details' | 'specs' | 'faqs'>('details');
+  const [customizerNotes, setCustomizerNotes] = useState<string>('');
 
   // Update internal product when initialProduct changes (e.g. page navigation)
   useEffect(() => {
@@ -576,13 +578,13 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
               </button>
 
               {/* SECONDARY: CUSTOMIZER STUDIO LINK */}
-              <Link
-                href="/#customizer"
-                className="w-full bg-white hover:bg-gray-50 border border-gray-300 text-gray-800 py-3.5 px-6 rounded-2xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-xs hover:border-[#dfad2d]"
+              <a
+                href="#customizer-studio"
+                className="w-full bg-white hover:bg-gray-50 border border-gray-300 text-gray-800 py-3.5 px-6 rounded-2xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-xs hover:border-[#dfad2d] cursor-pointer"
               >
                 <Wand2 size={16} className="text-[#b8860b]" />
-                Launch Interactive Customizer Studio
-              </Link>
+                Design in Live Customizer Studio Below
+              </a>
             </div>
 
             {/* TRUST & SERVICE GUARANTEES */}
@@ -606,6 +608,21 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
 
           </div>
 
+        </div>
+
+        {/* ================= LIVE CUSTOMIZER STUDIO SECTION ================= */}
+        <div className="mt-16 bg-white rounded-3xl border border-gray-200/80 shadow-sm overflow-hidden p-2 sm:p-6">
+          <Customizer
+            productTitle={product.title}
+            productPrice={`${product.currency.symbol}${effectiveUnitPrice}`}
+            initialBaseColor={selectedColor.hex}
+            buttonLabel="Transfer Custom Design To Enquiry"
+            onEnquireCustom={({ baseColor, singleBorderColor, doubleBorderColor, text, fontStyle }) => {
+              const notes = `Custom Design Specifications:\n• Custom Lettering: "${text}"\n• Typography: ${fontStyle}\n• Base Fabric Color: ${baseColor}\n• Primary Border: ${singleBorderColor}\n• Accent Border: ${doubleBorderColor}`;
+              setCustomizerNotes(notes);
+              setIsEnquiryOpen(true);
+            }}
+          />
         </div>
 
         {/* ================= TABS: SPECIFICATIONS, CARE & FAQS ================= */}
@@ -754,6 +771,7 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
         unitPrice={effectiveUnitPrice}
         totalPrice={totalDiscountedPrice}
         discountSaved={totalSaved}
+        initialNotes={customizerNotes}
       />
 
       {/* ADMIN CONTROLS SIMULATOR DRAWER */}
