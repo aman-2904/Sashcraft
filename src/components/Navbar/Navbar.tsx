@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Search, Heart, ShoppingBag, Send, ChevronDown, Ribbon, Menu, X } from 'lucide-react';
+import { Search, Heart, ShoppingBag, Send, ChevronDown, ChevronRight, Ribbon, Menu, X } from 'lucide-react';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileCategoriesOpen, setIsMobileCategoriesOpen] = useState(false);
+  const [isMobileSashesOpen, setIsMobileSashesOpen] = useState(false);
 
   return (
     <div className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-[1400px] z-50">
@@ -28,11 +29,26 @@ export default function Navbar() {
           </li>
           <li className="group text-[15px] font-semibold text-gray-800 hover:text-[#b8860b] cursor-pointer flex items-center gap-1.5 transition-all duration-300 relative py-2 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-[#b8860b] after:transition-all after:duration-300 group-hover:after:w-full">
             Categories <ChevronDown size={16} className="transition-transform duration-300 group-hover:rotate-180" />
-
+            
             {/* Desktop Dropdown */}
             <div className="absolute top-full left-1/2 -translate-x-1/2 w-60 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
               <div className="bg-white border border-gray-100 rounded-2xl shadow-xl flex flex-col p-2">
-                <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Graduation Sashes</a>
+                
+                {/* Nested Sashes Dropdown */}
+                <div className="group/sash relative px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl flex items-center justify-between transition-colors cursor-pointer">
+                  Sashes
+                  <ChevronRight size={14} className="text-gray-400 group-hover/sash:text-[#b8860b]" />
+                  
+                  <div className="absolute left-full top-0 ml-2 w-56 opacity-0 invisible group-hover/sash:opacity-100 group-hover/sash:visible transition-all duration-300 z-50 pt-0">
+                    <div className="bg-white border border-gray-100 rounded-2xl shadow-xl flex flex-col p-2">
+                      <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Satin Sashes</a>
+                      <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Velvet Sashes</a>
+                      <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Double Layer Heavy Fabric</a>
+                      <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Single Layer Heavy Fabric</a>
+                    </div>
+                  </div>
+                </div>
+
                 <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Gowns & Caps</a>
                 <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Custom Aprons & Tees</a>
                 <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Jute & Tote Bags</a>
@@ -84,7 +100,7 @@ export default function Navbar() {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="absolute top-full left-0 w-full mt-4 bg-white border border-gray-100 rounded-3xl p-6 shadow-2xl lg:hidden flex flex-col gap-6 animate-in slide-in-from-top-4 fade-in duration-200">
+        <div className="absolute top-full left-0 w-full mt-4 bg-white border border-gray-100 rounded-3xl p-6 shadow-2xl lg:hidden flex flex-col gap-6 animate-in slide-in-from-top-4 fade-in duration-200 h-[80vh] overflow-y-auto">
           <ul className="flex flex-col gap-5">
             <li className="text-[17px] font-bold text-[#b8860b] border-b border-gray-100 pb-3">Home</li>
             <li className="border-b border-gray-100 pb-3">
@@ -95,14 +111,32 @@ export default function Navbar() {
                 Categories <ChevronDown size={20} className={`transition-transform duration-300 ${isMobileCategoriesOpen ? 'rotate-180' : ''}`} />
               </div>
 
-              {/* Mobile Accordion */}
+              {/* Mobile Categories Accordion */}
               {isMobileCategoriesOpen && (
-                <ul className="flex flex-col gap-3 mt-4 pl-4 border-l-2 border-[#b8860b]/20 animate-in slide-in-from-top-2 fade-in duration-200">
-                  <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1">Graduation Sashes</a></li>
-                  <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1">Gowns & Caps</a></li>
-                  <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1">Custom Aprons & Tees</a></li>
-                  <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1">Jute & Tote Bags</a></li>
-                  <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1">Flags</a></li>
+                <ul className="flex flex-col gap-2 mt-4 pl-4 border-l-2 border-[#b8860b]/20 animate-in slide-in-from-top-2 fade-in duration-200">
+                  
+                  {/* Nested Sashes Accordion */}
+                  <li className="py-1">
+                    <div 
+                      className="flex justify-between items-center text-[15px] font-semibold text-gray-700 cursor-pointer hover:text-[#b8860b]"
+                      onClick={() => setIsMobileSashesOpen(!isMobileSashesOpen)}
+                    >
+                      Sashes <ChevronDown size={16} className={`transition-transform duration-300 ${isMobileSashesOpen ? 'rotate-180' : ''}`} />
+                    </div>
+                    {isMobileSashesOpen && (
+                      <ul className="flex flex-col gap-3 mt-3 pl-4 border-l border-gray-200 animate-in slide-in-from-top-2 fade-in duration-200">
+                        <li><a href="#" className="text-gray-500 hover:text-[#b8860b] text-[14px] font-medium flex items-center gap-2"><ChevronRight size={14} className="text-[#b8860b]" /> Satin Sashes</a></li>
+                        <li><a href="#" className="text-gray-500 hover:text-[#b8860b] text-[14px] font-medium flex items-center gap-2"><ChevronRight size={14} className="text-[#b8860b]" /> Velvet Sashes</a></li>
+                        <li><a href="#" className="text-gray-500 hover:text-[#b8860b] text-[14px] font-medium flex items-center gap-2"><ChevronRight size={14} className="text-[#b8860b]" /> Double Layer Heavy Fabric</a></li>
+                        <li><a href="#" className="text-gray-500 hover:text-[#b8860b] text-[14px] font-medium flex items-center gap-2"><ChevronRight size={14} className="text-[#b8860b]" /> Single Layer Heavy Fabric</a></li>
+                      </ul>
+                    )}
+                  </li>
+
+                  <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1 mt-1">Gowns & Caps</a></li>
+                  <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1 mt-1">Custom Aprons & Tees</a></li>
+                  <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1 mt-1">Jute & Tote Bags</a></li>
+                  <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1 mt-1">Flags</a></li>
                 </ul>
               )}
             </li>
@@ -128,7 +162,7 @@ export default function Navbar() {
             </button>
           </div>
 
-          <button className="w-full bg-gradient-to-br from-[#dfad2d] to-[#a87e14] text-white py-4 rounded-xl text-[13px] font-bold tracking-widest flex items-center justify-center gap-2 shadow-lg">
+          <button className="w-full bg-gradient-to-br from-[#dfad2d] to-[#a87e14] text-white py-4 rounded-xl text-[13px] font-bold tracking-widest flex items-center justify-center gap-2 shadow-lg mb-8">
             <Send size={18} strokeWidth={2.5} /> GET CUSTOM QUOTE
           </button>
         </div>
