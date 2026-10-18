@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { Ribbon } from 'lucide-react';
 
 export default function Footer() {
@@ -28,7 +29,7 @@ export default function Footer() {
             <div className="flex flex-col gap-6 lg:ml-12">
               <h4 className="font-bold text-[#b8860b] text-[12px] tracking-widest uppercase mb-2">Categories</h4>
               <ul className="flex flex-col gap-4">
-                <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Graduation Sashes</a></li>
+                <li><Link href="/sashes/satinsashes" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Graduation Sashes</Link></li>
                 <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Gowns & Caps</a></li>
                 <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Custom Aprons & Tees</a></li>
                 <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Jute & Tote Bags</a></li>

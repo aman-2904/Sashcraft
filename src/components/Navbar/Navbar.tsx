@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { Search, Heart, ShoppingBag, Send, ChevronDown, ChevronRight, Ribbon, Menu, X } from 'lucide-react';
 
 export default function Navbar() {
@@ -12,7 +13,7 @@ export default function Navbar() {
     <div className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-[1400px] z-50">
       <nav className="flex items-center justify-between px-6 lg:px-8 py-3 bg-white/70 backdrop-blur-md border border-black rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.08)]">
         {/* Logo Section */}
-        <div className="flex items-center gap-3 lg:gap-4 shrink-0">
+        <Link href="/" className="flex items-center gap-3 lg:gap-4 shrink-0 hover:opacity-95 transition-opacity">
           <div className="w-10 h-10 lg:w-12 lg:h-12 bg-gradient-to-br from-[#dfad2d] to-[#a87e14] rounded-xl flex items-center justify-center text-white shadow-[0_4px_10px_rgba(184,134,11,0.3)]">
             <Ribbon size={24} className="lg:w-7 lg:h-7" strokeWidth={2.5} />
           </div>
@@ -20,12 +21,12 @@ export default function Navbar() {
             <span className="text-[18px] lg:text-[22px] font-bold text-gray-900 tracking-widest font-serif leading-tight">SASHCRAFT</span>
             <span className="text-[8px] lg:text-[10px] font-bold text-[#b8860b] tracking-wider uppercase mt-0.5 whitespace-nowrap">Custom Apparel & Crafts</span>
           </div>
-        </div>
+        </Link>
 
         {/* Navigation Links (Desktop Only) */}
         <ul className="hidden lg:flex items-center gap-10 m-0 p-0">
           <li className="group text-[15px] font-semibold text-[#b8860b] cursor-pointer flex items-center gap-1.5 transition-all duration-300 relative after:content-[''] after:absolute after:w-full after:h-0.5 after:-bottom-1 after:left-0 after:bg-[#b8860b] after:transition-all after:duration-300">
-            Home
+            <Link href="/">Home</Link>
           </li>
           <li className="group text-[15px] font-semibold text-gray-800 hover:text-[#b8860b] cursor-pointer flex items-center gap-1.5 transition-all duration-300 relative py-2 after:content-[''] after:absolute after:w-0 after:h-0.5 after:bottom-0 after:left-0 after:bg-[#b8860b] after:transition-all after:duration-300 group-hover:after:w-full">
             Categories <ChevronDown size={16} className="transition-transform duration-300 group-hover:rotate-180" />
@@ -35,16 +36,42 @@ export default function Navbar() {
               <div className="bg-white border border-gray-100 rounded-2xl shadow-xl flex flex-col p-2">
                 
                 {/* Nested Sashes Dropdown */}
-                <div className="group/sash relative px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl flex items-center justify-between transition-colors cursor-pointer">
-                  Sashes
-                  <ChevronRight size={14} className="text-gray-400 group-hover/sash:text-[#b8860b]" />
+                <div className="group/sash relative rounded-xl hover:bg-[#fdfaf2] transition-colors">
+                  <Link 
+                    href="/sashes/satinsashes"
+                    className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] flex items-center justify-between transition-colors w-full"
+                  >
+                    <span>Sashes</span>
+                    <ChevronRight size={14} className="text-gray-400 group-hover/sash:text-[#b8860b]" />
+                  </Link>
                   
-                  <div className="absolute left-full top-0 ml-2 w-56 opacity-0 invisible group-hover/sash:opacity-100 group-hover/sash:visible transition-all duration-300 z-50 pt-0">
+                  {/* Continuous hover bridge using pl-2 without margin gap */}
+                  <div className="absolute left-full top-0 pl-2 w-64 opacity-0 invisible group-hover/sash:opacity-100 group-hover/sash:visible transition-all duration-200 z-50">
                     <div className="bg-white border border-gray-100 rounded-2xl shadow-xl flex flex-col p-2">
-                      <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Satin Sashes</a>
-                      <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Velvet Sashes</a>
-                      <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Double Layer Heavy Fabric</a>
-                      <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Single Layer Heavy Fabric</a>
+                      <Link 
+                        href="/sashes/satinsashes" 
+                        className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap block w-full"
+                      >
+                        Satin Sashes
+                      </Link>
+                      <Link 
+                        href="/sashes/satinsashes" 
+                        className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap block w-full"
+                      >
+                        Velvet Sashes
+                      </Link>
+                      <Link 
+                        href="/sashes/satinsashes" 
+                        className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap block w-full"
+                      >
+                        Double Layer Heavy Fabric
+                      </Link>
+                      <Link 
+                        href="/sashes/satinsashes" 
+                        className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap block w-full"
+                      >
+                        Single Layer Heavy Fabric
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -102,7 +129,9 @@ export default function Navbar() {
       {isMobileMenuOpen && (
         <div className="absolute top-full left-0 w-full mt-4 bg-white border border-gray-100 rounded-3xl p-6 shadow-2xl lg:hidden flex flex-col gap-6 animate-in slide-in-from-top-4 fade-in duration-200 h-[80vh] overflow-y-auto">
           <ul className="flex flex-col gap-5">
-            <li className="text-[17px] font-bold text-[#b8860b] border-b border-gray-100 pb-3">Home</li>
+            <li className="text-[17px] font-bold text-[#b8860b] border-b border-gray-100 pb-3">
+              <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
+            </li>
             <li className="border-b border-gray-100 pb-3">
               <div
                 className="flex justify-between items-center text-[17px] font-bold text-gray-800 cursor-pointer"
@@ -125,7 +154,15 @@ export default function Navbar() {
                     </div>
                     {isMobileSashesOpen && (
                       <ul className="flex flex-col gap-3 mt-3 pl-4 border-l border-gray-200 animate-in slide-in-from-top-2 fade-in duration-200">
-                        <li><a href="#" className="text-gray-500 hover:text-[#b8860b] text-[14px] font-medium flex items-center gap-2"><ChevronRight size={14} className="text-[#b8860b]" /> Satin Sashes</a></li>
+                        <li>
+                          <Link 
+                            href="/sashes/satinsashes" 
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="text-gray-500 hover:text-[#b8860b] text-[14px] font-medium flex items-center gap-2"
+                          >
+                            <ChevronRight size={14} className="text-[#b8860b]" /> Satin Sashes
+                          </Link>
+                        </li>
                         <li><a href="#" className="text-gray-500 hover:text-[#b8860b] text-[14px] font-medium flex items-center gap-2"><ChevronRight size={14} className="text-[#b8860b]" /> Velvet Sashes</a></li>
                         <li><a href="#" className="text-gray-500 hover:text-[#b8860b] text-[14px] font-medium flex items-center gap-2"><ChevronRight size={14} className="text-[#b8860b]" /> Double Layer Heavy Fabric</a></li>
                         <li><a href="#" className="text-gray-500 hover:text-[#b8860b] text-[14px] font-medium flex items-center gap-2"><ChevronRight size={14} className="text-[#b8860b]" /> Single Layer Heavy Fabric</a></li>

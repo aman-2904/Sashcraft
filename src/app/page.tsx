@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Crown, Wand2, ArrowRight, Ribbon, GraduationCap, Shirt, ShoppingBag, Flag, Gem, PenLine, Plane, Package, Star, MapPin, Mail, Phone } from "lucide-react";
 import Customizer from "@/components/Customizer/Customizer";
 
@@ -34,10 +35,10 @@ export default function Home() {
                 <Wand2 size={18} strokeWidth={2.5} />
                 LAUNCH CUSTOMIZER STUDIO
               </button>
-              <button className="bg-white hover:bg-gray-50 text-gray-900 border border-gray-200 px-8 py-4 rounded-xl font-bold text-sm tracking-wide flex items-center gap-2 transition-all shadow-sm hover:-translate-y-1">
+              <Link href="/sashes/satinsashes" className="bg-white hover:bg-gray-50 text-gray-900 border border-gray-200 px-8 py-4 rounded-xl font-bold text-sm tracking-wide flex items-center gap-2 transition-all shadow-sm hover:-translate-y-1">
                 Explore Collection
                 <ArrowRight size={18} />
-              </button>
+              </Link>
             </div>
 
             {/* Stats Row */}
@@ -95,13 +96,13 @@ export default function Home() {
         {/* Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 w-full">
           {/* Card 1 */}
-          <div className="group bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 flex flex-col items-center text-center shadow-sm border border-gray-100 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:border-[#c19b38] hover:shadow-[0_8px_30px_rgba(193,155,56,0.15)]">
+          <Link href="/sashes/satinsashes" className="group bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 flex flex-col items-center text-center shadow-sm border border-gray-100 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:border-[#c19b38] hover:shadow-[0_8px_30px_rgba(193,155,56,0.15)]">
             <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#fdfaf2] rounded-xl sm:rounded-[20px] flex items-center justify-center text-[#c19b38] mb-3 sm:mb-5 shadow-sm border border-[#c19b38]/10 transition-colors duration-300 group-hover:bg-[#c19b38] group-hover:text-white">
               <Ribbon size={24} strokeWidth={2.5} className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <h4 className="text-[14px] sm:text-[17px] font-bold text-gray-900 mb-1 transition-colors duration-300 group-hover:text-[#c19b38]">Sashes & Stoles</h4>
             <p className="text-[10px] sm:text-[12px] text-gray-400 font-semibold tracking-wide">Graduation & Pageant</p>
-          </div>
+          </Link>
 
           {/* Card 2 */}
           <div className="group bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-8 flex flex-col items-center text-center shadow-sm border border-gray-100 transition-all duration-300 cursor-pointer hover:-translate-y-1 hover:border-[#c19b38] hover:shadow-[0_8px_30px_rgba(193,155,56,0.15)]">
