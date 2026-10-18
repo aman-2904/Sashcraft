@@ -55,19 +55,19 @@ export default function Navbar() {
                         Satin Sashes
                       </Link>
                       <Link 
-                        href="/sashes/satinsashes" 
+                        href="/sashes/velvetsashes" 
                         className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap block w-full"
                       >
                         Velvet Sashes
                       </Link>
                       <Link 
-                        href="/sashes/satinsashes" 
+                        href="/sashes/doublelayer" 
                         className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap block w-full"
                       >
                         Double Layer Heavy Fabric
                       </Link>
                       <Link 
-                        href="/sashes/satinsashes" 
+                        href="/sashes/singlelayer" 
                         className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap block w-full"
                       >
                         Single Layer Heavy Fabric
@@ -163,9 +163,33 @@ export default function Navbar() {
                             <ChevronRight size={14} className="text-[#b8860b]" /> Satin Sashes
                           </Link>
                         </li>
-                        <li><a href="#" className="text-gray-500 hover:text-[#b8860b] text-[14px] font-medium flex items-center gap-2"><ChevronRight size={14} className="text-[#b8860b]" /> Velvet Sashes</a></li>
-                        <li><a href="#" className="text-gray-500 hover:text-[#b8860b] text-[14px] font-medium flex items-center gap-2"><ChevronRight size={14} className="text-[#b8860b]" /> Double Layer Heavy Fabric</a></li>
-                        <li><a href="#" className="text-gray-500 hover:text-[#b8860b] text-[14px] font-medium flex items-center gap-2"><ChevronRight size={14} className="text-[#b8860b]" /> Single Layer Heavy Fabric</a></li>
+                        <li>
+                          <Link 
+                            href="/sashes/velvetsashes" 
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="text-gray-500 hover:text-[#b8860b] text-[14px] font-medium flex items-center gap-2"
+                          >
+                            <ChevronRight size={14} className="text-[#b8860b]" /> Velvet Sashes
+                          </Link>
+                        </li>
+                        <li>
+                          <Link 
+                            href="/sashes/doublelayer" 
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="text-gray-500 hover:text-[#b8860b] text-[14px] font-medium flex items-center gap-2"
+                          >
+                            <ChevronRight size={14} className="text-[#b8860b]" /> Double Layer Heavy Fabric
+                          </Link>
+                        </li>
+                        <li>
+                          <Link 
+                            href="/sashes/singlelayer" 
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="text-gray-500 hover:text-[#b8860b] text-[14px] font-medium flex items-center gap-2"
+                          >
+                            <ChevronRight size={14} className="text-[#b8860b]" /> Single Layer Heavy Fabric
+                          </Link>
+                        </li>
                       </ul>
                     )}
                   </li>
