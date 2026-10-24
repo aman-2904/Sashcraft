@@ -39,6 +39,7 @@ import {
 import { getWishlist, toggleWishlist, WISHLIST_UPDATED_EVENT } from '@/utils/wishlist';
 import { sashesCatalog, SashProductConfig } from '@/data/sashesData';
 import UserAuthModal from '@/components/Auth/UserAuthModal';
+import { getWhatsAppSupportUrl, WHATSAPP_DISPLAY_NUMBER } from '@/utils/contact';
 
 function AccountDashboardContent() {
   const searchParams = useSearchParams();
@@ -654,12 +655,12 @@ function AccountDashboardContent() {
                   Need custom urgent sample delivery or specialized metallic gold zari embroidery? Our master artisans are available on WhatsApp 7 days a week.
                 </p>
                 <a
-                  href="https://wa.me/919876543210?text=Hello%20SashCraft%2C%20I%20would%20like%20assistance%20with%20my%20account%20and%20orders."
+                  href={getWhatsAppSupportUrl('Hello SashCraft, I would like assistance with my account and orders.')}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 font-bold text-[#b8860b] hover:text-[#916b09]"
                 >
-                  <MessageCircle size={15} /> Chat with Concierge <ArrowRight size={13} />
+                  <MessageCircle size={15} /> Chat on WhatsApp ({WHATSAPP_DISPLAY_NUMBER}) <ArrowRight size={13} />
                 </a>
               </div>
             </div>
@@ -739,9 +740,9 @@ function AccountDashboardContent() {
                         </div>
 
                         <a
-                          href={`https://wa.me/919876543210?text=${encodeURIComponent(
+                          href={getWhatsAppSupportUrl(
                             `Hello SashCraft, I am checking the status of my order #${ord.reference_id} for ${ord.quantity}x ${ord.product_name}.`
-                          )}`}
+                          )}
                           target="_blank"
                           rel="noreferrer"
                           className="bg-[#25D366]/10 text-[#25D366] hover:bg-[#25D366]/20 px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-colors"

@@ -6,6 +6,7 @@ import { X, Send, MessageCircle, CheckCircle2, ShieldCheck, Calendar, Building, 
 import { SatinSashProductConfig, VariantDetails, ProductColor } from '@/data/satinSashData';
 import { supabase } from '@/utils/supabase/client';
 import { getCachedUserProfile, getUserProfile } from '@/utils/userProfile';
+import { getWhatsAppSupportUrl, WHATSAPP_DISPLAY_NUMBER } from '@/utils/contact';
 
 interface EnquiryModalProps {
   isOpen: boolean;
@@ -186,21 +187,21 @@ export default function EnquiryModal({
   };
 
   const handleWhatsAppEnquiry = () => {
-    const text = `*New Order Enquiry - SashCraft*%0A%0A` +
-      `*Product:* ${product.title}%0A` +
-      `*Variant:* ${variant.name}%0A` +
-      `*Color:* ${selectedColor.name}%0A` +
-      `*Quantity:* ${quantity} units%0A` +
-      `*Unit Price:* ${product.currency.symbol}${unitPrice}%0A` +
-      `*Total Estimate:* ${product.currency.symbol}${totalPrice}%0A` +
-      (formData.fullName ? `*Name:* ${formData.fullName}%0A` : '') +
-      (formData.address ? `*Delivery Address:* ${formData.address}%0A` : '') +
-      (formData.organization ? `*Org / College:* ${formData.organization}%0A` : '') +
-      (formData.eventDate ? `*Event Date:* ${formData.eventDate}%0A` : '') +
-      (formData.customNotes ? `*Custom Notes:* ${formData.customNotes}%0A` : '') +
-      `%0APlease share availability, mockups and dispatch schedule.`;
+    const text = `*New Order Enquiry - SashCraft*\n\n` +
+      `*Product:* ${product.title}\n` +
+      `*Variant:* ${variant.name}\n` +
+      `*Color:* ${selectedColor.name}\n` +
+      `*Quantity:* ${quantity} units\n` +
+      `*Unit Price:* ${product.currency.symbol}${unitPrice}\n` +
+      `*Total Estimate:* ${product.currency.symbol}${totalPrice}\n` +
+      (formData.fullName ? `*Name:* ${formData.fullName}\n` : '') +
+      (formData.address ? `*Delivery Address:* ${formData.address}\n` : '') +
+      (formData.organization ? `*Org / College:* ${formData.organization}\n` : '') +
+      (formData.eventDate ? `*Event Date:* ${formData.eventDate}\n` : '') +
+      (formData.customNotes ? `*Custom Notes:* ${formData.customNotes}\n` : '') +
+      `\nPlease share availability, mockups and dispatch schedule.`;
 
-    const whatsappUrl = `https://wa.me/919876543210?text=${text}`;
+    const whatsappUrl = getWhatsAppSupportUrl(text);
     window.open(whatsappUrl, '_blank');
   };
 
