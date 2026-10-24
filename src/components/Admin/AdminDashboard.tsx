@@ -546,11 +546,12 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
   const handleAddImage = async (slug: string, variantKey: 'withLace' | 'withoutLace', url: string) => {
     const cleanUrl = url.trim();
     if (!cleanUrl) return;
-    let updatedProduct: SashProductConfig | null = null;
-    setProductsList((prev) =>
-      prev.map((prod) => {
+    setNewImageUrls((prev) => ({ ...prev, [`${slug}_${variantKey}`]: '' }));
+
+    setProductsList((prev) => {
+      return prev.map((prod) => {
         if (prod.slug !== slug) return prod;
-        const currentImages = prod.variants[variantKey].images || [];
+        const currentImages = prod.variants[variantKey]?.images || [];
         const updated = {
           ...prod,
           variants: {
@@ -561,55 +562,59 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
             },
           },
         };
-        updatedProduct = updated;
-        return updated;
-      })
-    );
-    setNewImageUrls((prev) => ({ ...prev, [`${slug}_${variantKey}`]: '' }));
 
-    if (updatedProduct) {
-      const res = await persistProductUpdate(updatedProduct);
-      if (res.success) {
-        setSavedProductToast(`✓ Image URL saved to database & live on website!`);
-        setTimeout(() => setSavedProductToast(null), 3500);
-      }
-    }
+        // Immediately persist to Supabase & broadcast live
+        persistProductUpdate(updated).then((res) => {
+          if (res.success) {
+            setSavedProductToast(`✓ Image URL saved to database & live on website!`);
+          } else {
+            setSavedProductToast(`✓ Image URL added (${res.error || 'local'})`);
+          }
+          setTimeout(() => setSavedProductToast(null), 3500);
+        });
+
+        return updated;
+      });
+    });
   };
 
   const handleRemoveImage = async (slug: string, variantKey: 'withLace' | 'withoutLace', indexToRemove: number) => {
-    let updatedProduct: SashProductConfig | null = null;
-    setProductsList((prev) =>
-      prev.map((prod) => {
+    setProductsList((prev) => {
+      return prev.map((prod) => {
         if (prod.slug !== slug) return prod;
-        const updatedImages = prod.variants[variantKey].images.filter((_, idx) => idx !== indexToRemove);
+        const currentImages = prod.variants[variantKey]?.images || [];
+        const filteredImages = currentImages.filter((_, idx) => idx !== indexToRemove);
         const updated = {
           ...prod,
           variants: {
             ...prod.variants,
             [variantKey]: {
               ...prod.variants[variantKey],
-              images: updatedImages,
+              images: filteredImages,
             },
           },
         };
-        updatedProduct = updated;
-        return updated;
-      })
-    );
 
-    if (updatedProduct) {
-      await persistProductUpdate(updatedProduct);
-      setSavedProductToast(`✓ Image removed & database updated!`);
-      setTimeout(() => setSavedProductToast(null), 3000);
-    }
+        // Immediately persist to Supabase & broadcast live
+        persistProductUpdate(updated).then((res) => {
+          if (res.success) {
+            setSavedProductToast(`✓ Image deleted from database & website!`);
+          } else {
+            setSavedProductToast(`✓ Image removed (${res.error || 'Check DB'})`);
+          }
+          setTimeout(() => setSavedProductToast(null), 3000);
+        });
+
+        return updated;
+      });
+    });
   };
 
   const handleSetPrimaryImage = async (slug: string, variantKey: 'withLace' | 'withoutLace', indexToPrimary: number) => {
-    let updatedProduct: SashProductConfig | null = null;
-    setProductsList((prev) =>
-      prev.map((prod) => {
+    setProductsList((prev) => {
+      return prev.map((prod) => {
         if (prod.slug !== slug) return prod;
-        const images = [...prod.variants[variantKey].images];
+        const images = [...(prod.variants[variantKey]?.images || [])];
         if (indexToPrimary >= 0 && indexToPrimary < images.length) {
           const [primary] = images.splice(indexToPrimary, 1);
           images.unshift(primary);
@@ -624,28 +629,29 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
             },
           },
         };
-        updatedProduct = updated;
-        return updated;
-      })
-    );
 
-    if (updatedProduct) {
-      await persistProductUpdate(updatedProduct);
-      setSavedProductToast(`✓ Cover image updated & saved to database!`);
-      setTimeout(() => setSavedProductToast(null), 3000);
-    }
+        // Immediately persist to Supabase & broadcast live
+        persistProductUpdate(updated).then((res) => {
+          if (res.success) {
+            setSavedProductToast(`✓ Cover image updated in database & website!`);
+          }
+          setTimeout(() => setSavedProductToast(null), 3000);
+        });
+
+        return updated;
+      });
+    });
   };
 
   const handleImageUpload = async (slug: string, variantKey: 'withLace' | 'withoutLace', file: File) => {
     try {
       setIsUploadingImage((prev) => ({ ...prev, [`${slug}_${variantKey}`]: true }));
       const dataUrl = await compressImageFile(file);
-      
-      let updatedProduct: SashProductConfig | null = null;
-      setProductsList((prev) =>
-        prev.map((prod) => {
+
+      setProductsList((prev) => {
+        return prev.map((prod) => {
           if (prod.slug !== slug) return prod;
-          const currentImages = prod.variants[variantKey].images || [];
+          const currentImages = prod.variants[variantKey]?.images || [];
           const updated = {
             ...prod,
             variants: {
@@ -656,20 +662,20 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
               },
             },
           };
-          updatedProduct = updated;
-          return updated;
-        })
-      );
 
-      if (updatedProduct) {
-        const res = await persistProductUpdate(updatedProduct);
-        if (res.success) {
-          setSavedProductToast(`✓ Image uploaded & stored in database! Live on website.`);
-        } else {
-          setSavedProductToast(`✓ Image uploaded! Click "Save" below to sync database (${res.error || 'local'}).`);
-        }
-      }
-      setTimeout(() => setSavedProductToast(null), 4000);
+          // Immediately persist to Supabase & broadcast live
+          persistProductUpdate(updated).then((res) => {
+            if (res.success) {
+              setSavedProductToast(`✓ Image uploaded & stored in database! Live on website.`);
+            } else {
+              setSavedProductToast(`✓ Image uploaded! (${res.error || 'local'})`);
+            }
+            setTimeout(() => setSavedProductToast(null), 4000);
+          });
+
+          return updated;
+        });
+      });
     } catch (err) {
       console.error('Failed to read image file:', err);
       setSavedProductToast('Failed to process image. Please try a different file.');
@@ -1813,7 +1819,7 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
                               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
                                 {curImages.map((imgUrl, imgIdx) => (
                                   <div
-                                    key={imgIdx}
+                                    key={`${imgUrl.slice(0, 40)}_${imgIdx}`}
                                     className="group relative aspect-[3/4] rounded-xl overflow-hidden border border-gray-700 bg-black/50"
                                   >
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1824,7 +1830,7 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
                                     />
 
                                     {/* Badge */}
-                                    <div className="absolute top-1 left-1">
+                                    <div className="absolute top-1 left-1 pointer-events-none">
                                       <span
                                         className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${
                                           imgIdx === 0
@@ -1837,28 +1843,32 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
                                     </div>
 
                                     {/* Hover Action Overlay */}
-                                    <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-1">
+                                    <div className="absolute inset-0 z-20 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-1.5 pointer-events-auto">
                                       {imgIdx !== 0 && (
                                         <button
                                           type="button"
-                                          onClick={() =>
-                                            handleSetPrimaryImage(product.slug, curVariant, imgIdx)
-                                          }
-                                          className="px-2 py-1 bg-[#dfad2d] hover:bg-[#c99719] text-black text-[10px] font-bold rounded flex items-center gap-1 transition-all cursor-pointer shadow"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            e.preventDefault();
+                                            handleSetPrimaryImage(product.slug, curVariant, imgIdx);
+                                          }}
+                                          className="px-2.5 py-1 bg-[#dfad2d] hover:bg-[#c99719] active:scale-95 text-black text-[10px] font-bold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-md"
                                           title="Set as primary cover image"
                                         >
-                                          <Star size={10} className="fill-black" /> Cover
+                                          <Star size={11} className="fill-black" /> Cover
                                         </button>
                                       )}
                                       <button
                                         type="button"
-                                        onClick={() =>
-                                          handleRemoveImage(product.slug, curVariant, imgIdx)
-                                        }
-                                        className="px-2 py-1 bg-red-600/90 hover:bg-red-600 text-white text-[10px] font-bold rounded flex items-center gap-1 transition-all cursor-pointer shadow"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          e.preventDefault();
+                                          handleRemoveImage(product.slug, curVariant, imgIdx);
+                                        }}
+                                        className="px-2.5 py-1 bg-red-600 hover:bg-red-700 active:scale-95 text-white text-[10px] font-bold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-md"
                                         title="Delete image"
                                       >
-                                        <Trash2 size={10} /> Delete
+                                        <Trash2 size={11} /> Delete
                                       </button>
                                     </div>
                                   </div>

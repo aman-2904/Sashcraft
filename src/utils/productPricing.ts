@@ -85,16 +85,16 @@ export function applyOverrideToProduct(
 
   // Determine dynamic images from database override if present
   const withLaceImages =
-    override.withLaceImages && override.withLaceImages.length > 0
+    override.withLaceImages !== undefined && Array.isArray(override.withLaceImages)
       ? override.withLaceImages
-      : override.images && override.images.length > 0
+      : override.images !== undefined && Array.isArray(override.images)
       ? override.images
       : product.variants.withLace.images;
 
   const withoutLaceImages =
-    override.withoutLaceImages && override.withoutLaceImages.length > 0
+    override.withoutLaceImages !== undefined && Array.isArray(override.withoutLaceImages)
       ? override.withoutLaceImages
-      : override.images && override.images.length > 0
+      : override.images !== undefined && Array.isArray(override.images)
       ? override.images
       : product.variants.withoutLace.images;
 
