@@ -1,7 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  async rewrites() {
+    return [
+      {
+        source: '/customizerstudio',
+        destination: '/CustomizerStudio',
+      },
+      {
+        source: '/customizer-studio',
+        destination: '/CustomizerStudio',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

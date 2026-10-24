@@ -177,8 +177,17 @@ export default function Navbar() {
               </div>
             </div>
           </li>
-          <li className="group text-[15px] font-semibold text-gray-800 hover:text-[#b8860b] cursor-pointer flex items-center gap-1.5 transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:-bottom-1 after:left-0 after:bg-[#b8860b] after:transition-all after:duration-300 group-hover:after:w-full">
-            🪄 Customizer Studio
+          <li className="relative">
+            <Link 
+              href="/CustomizerStudio"
+              className={`text-[15px] font-semibold flex items-center gap-1.5 transition-all duration-300 relative py-1 ${
+                pathname === '/CustomizerStudio' || pathname === '/customizerstudio'
+                  ? 'text-[#b8860b] font-bold after:content-[\'\'] after:absolute after:w-full after:h-0.5 after:-bottom-1 after:left-0 after:bg-[#b8860b]'
+                  : 'text-gray-800 hover:text-[#b8860b] after:content-[\'\'] after:absolute after:w-0 after:h-0.5 after:-bottom-1 after:left-0 after:bg-[#b8860b] after:transition-all after:duration-300 hover:after:w-full'
+              }`}
+            >
+              🪄 Customizer Studio
+            </Link>
           </li>
           <li className="group text-[15px] font-semibold text-gray-800 hover:text-[#b8860b] cursor-pointer flex items-center gap-1.5 transition-all duration-300 relative after:content-[''] after:absolute after:w-0 after:h-0.5 after:-bottom-1 after:left-0 after:bg-[#b8860b] after:transition-all after:duration-300 group-hover:after:w-full">
             About Us
@@ -390,7 +399,19 @@ export default function Navbar() {
                 </ul>
               )}
             </li>
-            <li className="text-[17px] font-bold text-gray-800 border-b border-gray-100 pb-3">🪄 Customizer Studio</li>
+            <li className="border-b border-gray-100 pb-3">
+              <Link
+                href="/CustomizerStudio"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`text-[17px] font-bold block transition-colors ${
+                  pathname === '/CustomizerStudio' || pathname === '/customizerstudio'
+                    ? 'text-[#b8860b]'
+                    : 'text-gray-800 hover:text-[#b8860b]'
+                }`}
+              >
+                🪄 Customizer Studio
+              </Link>
+            </li>
             <li className="text-[17px] font-bold text-gray-800 border-b border-gray-100 pb-3">About Us</li>
             <li className="text-[17px] font-bold text-gray-800 border-b border-gray-100 pb-3">Contact</li>
           </ul>

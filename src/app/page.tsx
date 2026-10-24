@@ -31,10 +31,13 @@ export default function Home() {
 
             {/* Buttons */}
             <div className="flex items-center gap-5 mb-16">
-              <button className="bg-[#b8860b] hover:bg-[#a07409] text-white px-8 py-4 rounded-xl font-bold text-sm tracking-wide flex items-center gap-2 transition-all shadow-[0_8px_20px_rgba(184,134,11,0.3)] hover:-translate-y-1">
+              <Link 
+                href="/CustomizerStudio" 
+                className="bg-[#b8860b] hover:bg-[#a07409] text-white px-8 py-4 rounded-xl font-bold text-sm tracking-wide flex items-center gap-2 transition-all shadow-[0_8px_20px_rgba(184,134,11,0.3)] hover:-translate-y-1"
+              >
                 <Wand2 size={18} strokeWidth={2.5} />
                 LAUNCH CUSTOMIZER STUDIO
-              </button>
+              </Link>
               <Link href="/sashes/satinsashes" className="bg-white hover:bg-gray-50 text-gray-900 border border-gray-200 px-8 py-4 rounded-xl font-bold text-sm tracking-wide flex items-center gap-2 transition-all shadow-sm hover:-translate-y-1">
                 Explore Collection
                 <ArrowRight size={18} />

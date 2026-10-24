@@ -48,7 +48,7 @@ export default function Footer() {
             <div className="flex flex-col gap-6">
               <h4 className="font-bold text-[#b8860b] text-[12px] tracking-widest uppercase mb-2">Customer Service</h4>
               <ul className="flex flex-col gap-4">
-                <li><Link href="/sashes/satinsashes" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Customizer Studio</Link></li>
+                <li><Link href="/CustomizerStudio" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Customizer Studio</Link></li>
                 <li><Link href="/sashes/satinsashes" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Bulk Quote Request</Link></li>
                 <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Shipping & Delivery</a></li>
                 <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Returns Policy</a></li>
