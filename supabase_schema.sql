@@ -107,20 +107,67 @@ CREATE POLICY "Allow All Updates on sash_products"
     WITH CHECK (true);
 
 -- 6. RLS Policies for enquiries:
--- Allow customers to submit enquiries from the public storefront
+-- Allow customers and visitors to submit enquiries from the storefront
 DROP POLICY IF EXISTS "Public Insert on enquiries" ON public.enquiries;
 CREATE POLICY "Public Insert on enquiries"
     ON public.enquiries
     FOR INSERT
     WITH CHECK (true);
 
--- Allow reading, updating status, and managing enquiries
+-- Drop old permissive policies if they exist
 DROP POLICY IF EXISTS "Allow All Access on enquiries" ON public.enquiries;
-CREATE POLICY "Allow All Access on enquiries"
+DROP POLICY IF EXISTS "Customer Read Own Enquiries" ON public.enquiries;
+DROP POLICY IF EXISTS "Admin Manage Enquiries" ON public.enquiries;
+DROP POLICY IF EXISTS "Admin Delete Enquiries" ON public.enquiries;
+
+-- Customers can ONLY view their own enquiries; Admins can view all enquiries
+CREATE POLICY "Customer Read Own Enquiries"
     ON public.enquiries
-    FOR ALL
-    USING (true)
-    WITH CHECK (true);
+    FOR SELECT
+    USING (
+        lower(email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+        OR
+        (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'superadmin')
+        OR
+        EXISTS (
+            SELECT 1 FROM public.admin_users 
+            WHERE id = auth.uid() OR lower(email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+        )
+    );
+
+-- Only verified Admins can update enquiry statuses or notes
+CREATE POLICY "Admin Manage Enquiries"
+    ON public.enquiries
+    FOR UPDATE
+    USING (
+        (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'superadmin')
+        OR
+        EXISTS (
+            SELECT 1 FROM public.admin_users 
+            WHERE id = auth.uid() OR lower(email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+        )
+    )
+    WITH CHECK (
+        (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'superadmin')
+        OR
+        EXISTS (
+            SELECT 1 FROM public.admin_users 
+            WHERE id = auth.uid() OR lower(email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+        )
+    );
+
+-- Only verified Admins can delete enquiries
+CREATE POLICY "Admin Delete Enquiries"
+    ON public.enquiries
+    FOR DELETE
+    USING (
+        (auth.jwt() -> 'user_metadata' ->> 'role') IN ('admin', 'superadmin')
+        OR
+        EXISTS (
+            SELECT 1 FROM public.admin_users 
+            WHERE id = auth.uid() OR lower(email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+        )
+    );
 
 -- 7. RLS Policies for user_profiles:
 DROP POLICY IF EXISTS "Allow user to manage own profile" ON public.user_profiles;

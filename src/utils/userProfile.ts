@@ -156,10 +156,11 @@ export async function saveUserProfile(profile: UserProfile): Promise<{ success: 
 }
 
 export async function fetchUserOrders(email: string): Promise<UserOrderEnquiry[]> {
-  const cleanEmail = email.trim().toLowerCase();
+  const cleanEmail = (email || '').trim().toLowerCase();
+  if (!cleanEmail) return [];
   let orders: UserOrderEnquiry[] = [];
 
-  // 1. Fetch from Supabase enquiries table
+  // 1. Fetch from Supabase enquiries table (strictly filtered to this user's email)
   try {
     const { data, error } = await supabase
       .from('enquiries')
@@ -168,7 +169,12 @@ export async function fetchUserOrders(email: string): Promise<UserOrderEnquiry[]
       .order('created_at', { ascending: false });
 
     if (!error && data && data.length > 0) {
-      orders = data.map((d: any) => ({
+      // Extra security filter: strictly ensure no other user's enquiries are returned
+      const userSpecificRecords = data.filter(
+        (d: any) => (d.email || '').trim().toLowerCase() === cleanEmail
+      );
+
+      orders = userSpecificRecords.map((d: any) => ({
         id: d.id?.toString() || Math.random().toString(),
         reference_id: d.reference_id,
         product_name: d.product_name,
