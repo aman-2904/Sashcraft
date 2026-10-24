@@ -297,8 +297,11 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
             );
           } else if (payload.eventType === 'DELETE' && payload.old) {
             const oldId = payload.old.id?.toString();
-            if (oldId) {
-              setEnquiries((prev) => prev.filter((e) => e.id !== oldId));
+            const oldRef = payload.old.reference_id;
+            if (oldId || oldRef) {
+              setEnquiries((prev) =>
+                prev.filter((e) => e.id !== oldId && e.reference_id !== oldRef)
+              );
             }
           }
         }
@@ -344,7 +347,14 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
     if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
       bc = new BroadcastChannel('sashcraft_enquiries_channel');
       bc.onmessage = (event) => {
-        if (event.data) handleIncomingEnquiry(event.data);
+        if (event.data?.type === 'DELETE_ENQUIRY') {
+          const { reference_id, id } = event.data;
+          setEnquiries((prev) =>
+            prev.filter((e) => e.reference_id !== reference_id && e.id !== id)
+          );
+        } else if (event.data) {
+          handleIncomingEnquiry(event.data);
+        }
       };
     }
 
@@ -403,31 +413,80 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
   };
 
   // Delete Enquiry in State, Supabase & LocalStorage
-  const deleteEnquiry = async (id: string) => {
-    const target = enquiries.find((e) => e.id === id);
-    setEnquiries((prev) => prev.filter((item) => item.id !== id));
-    if (selectedEnquiry?.id === id) setSelectedEnquiry(null);
-    showToast('Enquiry removed.');
+  const deleteEnquiry = async (targetOrId: CustomerEnquiry | string) => {
+    let targetId: string;
+    let targetRef: string;
 
-    // Delete in Supabase
+    if (typeof targetOrId === 'object' && targetOrId !== null) {
+      targetId = targetOrId.id;
+      targetRef = targetOrId.reference_id;
+    } else {
+      targetId = targetOrId;
+      const found = enquiries.find((e) => e.id === targetId || e.reference_id === targetId);
+      targetRef = found?.reference_id || targetId;
+    }
+
+    // 1. Instantly update React state
+    setEnquiries((prev) =>
+      prev.filter((item) => item.id !== targetId && item.reference_id !== targetRef)
+    );
+    if (selectedEnquiry?.id === targetId || selectedEnquiry?.reference_id === targetRef) {
+      setSelectedEnquiry(null);
+    }
+    showToast(`✓ Enquiry #${targetRef} deleted.`);
+
+    // 2. Delete from Supabase Database
     try {
-      if (target) {
+      // Primary: Clean TEXT match by unique reference_id (e.g. 'SC-404485')
+      if (targetRef && targetRef.startsWith('SC-')) {
+        const { error: refErr } = await supabase
+          .from('enquiries')
+          .delete()
+          .eq('reference_id', targetRef);
+
+        if (refErr) {
+          console.warn('Supabase delete by reference_id notice:', refErr.message);
+        }
+      }
+
+      // Secondary: Delete by numeric primary key if targetId is an integer
+      if (/^\d+$/.test(targetId)) {
         await supabase
           .from('enquiries')
           .delete()
-          .or(`id.eq.${id},reference_id.eq.${target.reference_id}`);
+          .eq('id', Number(targetId));
       }
     } catch (e) {
       console.warn('Supabase delete error:', e);
     }
 
-    // Delete in LocalStorage
+    // 3. Delete from LocalStorage cache (clean matching on both reference_id and id)
     try {
       const local = JSON.parse(localStorage.getItem('sashcraft_enquiries') || '[]');
-      const updated = local.filter(
-        (item: any) => item.id !== id && item.ref !== id && item.reference_id !== id
-      );
-      localStorage.setItem('sashcraft_enquiries', JSON.stringify(updated));
+      if (Array.isArray(local)) {
+        const updated = local.filter((item: any) => {
+          const itemRef = item.reference_id || item.ref;
+          const itemId = item.id?.toString();
+          return (
+            itemRef !== targetRef &&
+            itemRef !== targetId &&
+            itemId !== targetId &&
+            itemId !== targetRef
+          );
+        });
+        localStorage.setItem('sashcraft_enquiries', JSON.stringify(updated));
+      }
+    } catch (e) {
+      console.warn('LocalStorage cleanup error:', e);
+    }
+
+    // 4. Broadcast deletion across other tabs/windows
+    try {
+      if ('BroadcastChannel' in window) {
+        const bc = new BroadcastChannel('sashcraft_enquiries_channel');
+        bc.postMessage({ type: 'DELETE_ENQUIRY', reference_id: targetRef, id: targetId });
+        bc.close();
+      }
     } catch {}
   };
 
@@ -1349,8 +1408,12 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
                                 <MessageCircle size={14} />
                               </a>
                               <button
-                                onClick={() => deleteEnquiry(enq.id)}
-                                className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteEnquiry(enq);
+                                }}
+                                className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition-colors cursor-pointer active:scale-95"
                                 title="Delete record"
                               >
                                 <Trash2 size={14} />
@@ -1491,8 +1554,12 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
 
                       <div className="flex flex-wrap gap-2 items-center">
                         <button
-                          onClick={() => deleteEnquiry(selectedEnquiry.id)}
-                          className="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-semibold text-xs flex items-center gap-1.5 cursor-pointer transition-colors"
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (selectedEnquiry) deleteEnquiry(selectedEnquiry);
+                          }}
+                          className="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-semibold text-xs flex items-center gap-1.5 cursor-pointer transition-colors active:scale-95"
                           title="Delete Enquiry"
                         >
                           <Trash2 size={14} /> Delete
