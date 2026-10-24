@@ -20,6 +20,9 @@ CREATE TABLE IF NOT EXISTS public.sash_products (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Ensure title column exists if table was previously created
+ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS title TEXT;
+
 -- 2. Create enquiries table (Customer quote requests, orders & shipping address)
 CREATE TABLE IF NOT EXISTS public.enquiries (
     id BIGSERIAL PRIMARY KEY,

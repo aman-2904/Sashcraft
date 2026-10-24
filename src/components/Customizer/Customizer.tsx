@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ShoppingCart, Plus, X } from "lucide-react";
+import { COLOR_PALETTE_ROWS, getColorNameFromHex } from "@/utils/colorPalette";
 
 export interface CustomizerProps {
   productTitle?: string;
@@ -28,32 +29,10 @@ export default function Customizer({
 }: CustomizerProps = {}) {
   const [baseColor, setBaseColor] = useState(initialBaseColor || "#111111");
   const [singleBorderColor, setSingleBorderColor] = useState(initialBorderColor || "#c42323");
-  const [doubleBorderColor, setDoubleBorderColor] = useState("#d7be82");
+  const [doubleBorderColor, setDoubleBorderColor] = useState("#c9aa66");
   const [text, setText] = useState("CLASS OF 2026");
   const [fontStyle, setFontStyle] = useState("Serif"); // Serif, Modern, Classic
   const [openPicker, setOpenPicker] = useState<string | null>(null);
-
-  // Extended color palette for the grid
-  const extendedPalette = [
-    // Greys/Neutrals
-    "#ffffff", "#f2f2f2", "#d9d9d9", "#bfbfbf", "#a6a6a6", "#737373", "#404040", "#000000",
-    // Reds
-    "#ffebeb", "#ffc2c2", "#ff9999", "#ff4d4d", "#ff0000", "#cc0000", "#990000", "#660000",
-    // Oranges
-    "#fff0e6", "#ffcc99", "#ffa366", "#ff7733", "#ff5500", "#cc4400", "#993300", "#662200",
-    // Yellows
-    "#ffffe6", "#ffffb3", "#ffff80", "#ffff4d", "#ffff00", "#cccc00", "#999900", "#666600",
-    // Greens
-    "#e6ffe6", "#99ff99", "#4dff4d", "#00ff00", "#00cc00", "#009900", "#006600", "#003300",
-    // Cyans/Teals
-    "#e6ffff", "#99ffff", "#4dffff", "#00ffff", "#00cccc", "#009999", "#006666", "#003333",
-    // Blues
-    "#e6f0ff", "#b3d1ff", "#80b3ff", "#4d94ff", "#1a75ff", "#005ce6", "#0044cc", "#002266",
-    // Purples
-    "#f2e6ff", "#d9b3ff", "#bf80ff", "#a64dff", "#8c1aff", "#7300e6", "#5900b3", "#400080",
-    // Pinks
-    "#ffe6f2", "#ffb3d9", "#ff80bf", "#ff4da6", "#ff1a8c", "#e60073", "#b30059", "#800040",
-  ];
 
   const extendedFonts = [
     // Standard Fonts
@@ -78,73 +57,11 @@ export default function Customizer({
     { name: "Apple Chancery", value: "'Apple Chancery', cursive" }
   ];
 
-  const renderPalette = (onSelect: (color: string) => void, id: string) => {
-    if (openPicker !== id) return null;
-    return (
-      <div className="absolute top-12 left-0 z-50 bg-white p-3 pt-2 rounded-xl shadow-2xl border border-gray-100 w-max flex flex-col gap-2">
-        <div className="flex justify-between items-center w-full">
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Colors</span>
-          <button 
-            onClick={(e) => { e.stopPropagation(); setOpenPicker(null); }}
-            className="text-gray-400 hover:text-gray-700 transition-colors p-1 rounded hover:bg-gray-100"
-          >
-            <X size={14} strokeWidth={2.5} />
-          </button>
-        </div>
-        <div className="grid grid-cols-8 gap-1">
-          {extendedPalette.map(color => (
-            <button
-              key={color}
-              onClick={(e) => {
-                e.stopPropagation();
-                onSelect(color);
-                setOpenPicker(null);
-              }}
-              className="w-5 h-5 rounded-[3px] hover:scale-125 transition-transform shadow-sm border border-black/5"
-              style={{ backgroundColor: color }}
-            />
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  const renderFontPalette = () => {
-    if (openPicker !== 'font') return null;
-    return (
-      <div className="absolute bottom-full right-0 mb-2 z-50 bg-white p-2 pb-3 rounded-xl shadow-2xl border border-gray-100 flex flex-col gap-1 w-56 max-h-[18rem] overflow-y-auto">
-        <div className="flex justify-between items-center sticky top-0 bg-white/95 backdrop-blur-sm z-10 pt-1 pb-2 mb-1 border-b border-gray-50 px-2">
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">More Fonts</span>
-          <button 
-            onClick={(e) => { e.stopPropagation(); setOpenPicker(null); }}
-            className="text-gray-400 hover:text-gray-700 transition-colors p-1 rounded hover:bg-gray-100"
-          >
-            <X size={14} strokeWidth={2.5} />
-          </button>
-        </div>
-        {extendedFonts.map(font => (
-          <button
-            key={font.name}
-            onClick={(e) => {
-              e.stopPropagation();
-              setFontStyle(font.value);
-              setOpenPicker(null);
-            }}
-            className="w-full text-left px-3 py-2 text-sm rounded hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200"
-            style={{ fontFamily: font.value }}
-          >
-            {font.name}
-          </button>
-        ))}
-      </div>
-    );
-  };
-
   // Base colors mapping
   const baseColors = [
     { name: "Black", hex: "#111111" },
     { name: "White", hex: "#ffffff" },
-    { name: "Navy Blue", hex: "#0f172a" },
+    { name: "Navy Blue", hex: "#0b1a30" },
     { name: "Forest Green", hex: "#14532d" },
     { name: "Burgundy", hex: "#7f1d1d" },
   ];
@@ -153,16 +70,137 @@ export default function Customizer({
     { name: "Red", hex: "#c42323" },
     { name: "Gold", hex: "#c19b38" },
     { name: "White", hex: "#ffffff" },
-    { name: "Silver", hex: "#94a3b8" },
+    { name: "Slate Blue", hex: "#859bb0" },
     { name: "None", hex: "transparent" },
   ];
 
   const doubleBorderColors = [
-    { name: "Champagne", hex: "#d7be82" },
+    { name: "Champagne", hex: "#c9aa66" },
     { name: "Gold", hex: "#c19b38" },
-    { name: "Silver", hex: "#94a3b8" },
+    { name: "Slate Blue", hex: "#859bb0" },
     { name: "None", hex: "transparent" },
   ];
+
+  const renderPalette = (
+    onSelect: (color: string) => void,
+    id: string,
+    currentColor: string
+  ) => {
+    if (openPicker !== id) return null;
+    return (
+      <>
+        {/* Transparent backdrop to easily dismiss when clicking outside */}
+        <div
+          className="fixed inset-0 z-40 bg-black/5"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpenPicker(null);
+          }}
+        />
+
+        {/* Floating popover card matching the design screenshot */}
+        <div 
+          onClick={(e) => e.stopPropagation()}
+          className="absolute z-50 bg-white p-3.5 sm:p-4 rounded-2xl shadow-2xl border border-gray-100/90 flex flex-col gap-2.5 animate-in fade-in zoom-in-95 duration-150 top-12 left-0 sm:left-auto sm:right-0 md:left-full md:right-auto md:ml-3 md:-top-6 w-[232px] sm:w-[248px]"
+        >
+          {/* Popover Header */}
+          <div className="flex justify-between items-center w-full pb-0.5">
+            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">
+              COLORS
+            </span>
+            <button 
+              type="button"
+              onClick={() => setOpenPicker(null)}
+              className="text-gray-400 hover:text-gray-800 transition-colors p-1 rounded-md hover:bg-gray-100 cursor-pointer"
+              title="Close palette"
+            >
+              <X size={15} strokeWidth={2.5} />
+            </button>
+          </div>
+
+          {/* 8-Column x 9-Row Color Matrix Grid */}
+          <div className="flex flex-col gap-1">
+            {COLOR_PALETTE_ROWS.map((row, rowIdx) => (
+              <div key={rowIdx} className="grid grid-cols-8 gap-1">
+                {row.map((item) => {
+                  const isSelected = currentColor.toLowerCase() === item.hex.toLowerCase();
+                  return (
+                    <button
+                      key={item.hex}
+                      type="button"
+                      onClick={() => {
+                        onSelect(item.hex);
+                        setOpenPicker(null);
+                      }}
+                      className={`w-[22px] h-[22px] sm:w-[24px] sm:h-[24px] rounded-[4px] transition-all cursor-pointer relative shadow-xs hover:scale-125 hover:z-20 hover:shadow-md ${
+                        isSelected
+                          ? "ring-2 ring-black ring-offset-1 scale-110 z-10"
+                          : "border border-black/10 hover:border-black/30"
+                      }`}
+                      style={{ backgroundColor: item.hex }}
+                      title={`${item.name} (${item.hex.toUpperCase()})`}
+                    />
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+
+          {/* Active color readout footer */}
+          <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-600">
+            <span className="truncate font-medium">{getColorNameFromHex(currentColor)}</span>
+            <span className="font-mono font-bold text-[10px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-800">
+              {currentColor.toUpperCase()}
+            </span>
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  const renderFontPalette = () => {
+    if (openPicker !== 'font') return null;
+    return (
+      <>
+        <div
+          className="fixed inset-0 z-40 bg-black/5"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpenPicker(null);
+          }}
+        />
+        <div 
+          onClick={(e) => e.stopPropagation()}
+          className="absolute bottom-full right-0 mb-2 z-50 bg-white p-2 pb-3 rounded-2xl shadow-2xl border border-gray-100 flex flex-col gap-1 w-56 max-h-[18rem] overflow-y-auto animate-in fade-in zoom-in-95 duration-150"
+        >
+          <div className="flex justify-between items-center sticky top-0 bg-white/95 backdrop-blur-sm z-10 pt-1 pb-2 mb-1 border-b border-gray-100 px-2">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">More Fonts</span>
+            <button 
+              type="button"
+              onClick={() => setOpenPicker(null)}
+              className="text-gray-400 hover:text-gray-700 transition-colors p-1 rounded hover:bg-gray-100"
+            >
+              <X size={14} strokeWidth={2.5} />
+            </button>
+          </div>
+          {extendedFonts.map(font => (
+            <button
+              key={font.name}
+              type="button"
+              onClick={() => {
+                setFontStyle(font.value);
+                setOpenPicker(null);
+              }}
+              className="w-full text-left px-3 py-2 text-sm rounded hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-200"
+              style={{ fontFamily: font.value }}
+            >
+              {font.name}
+            </button>
+          ))}
+        </div>
+      </>
+    );
+  };
 
   const getFontFamily = () => {
     if (fontStyle === "Modern") return { className: "font-sans font-bold tracking-[0.3em]", style: {} };
@@ -174,6 +212,11 @@ export default function Customizer({
   };
 
   const fontProps = getFontFamily();
+
+  // Helper to check if current selection matches preset or custom palette
+  const isCustomBase = !baseColors.some(c => c.hex.toLowerCase() === baseColor.toLowerCase());
+  const isCustomSingle = singleBorderColor !== 'transparent' && !singleBorderColors.some(c => c.hex.toLowerCase() === singleBorderColor.toLowerCase());
+  const isCustomDouble = doubleBorderColor !== 'transparent' && !doubleBorderColors.some(c => c.hex.toLowerCase() === doubleBorderColor.toLowerCase());
 
   return (
     <section id="customizer-studio" className="w-full bg-[#fdfbfb] px-4 sm:px-8 md:px-16 pt-12 pb-16 flex flex-col items-center">
@@ -257,117 +300,197 @@ export default function Customizer({
         {/* Right Controls */}
         <div className="flex-1 bg-white border border-gray-100 rounded-[2rem] p-6 lg:p-8 flex flex-col gap-5 shadow-md">
 
-          {/* Base Color Select */}
+          {/* 1. Base Color Select */}
           <div className="flex flex-col gap-2">
-            <label className="text-[#c19b38] text-[10.5px] font-bold tracking-widest uppercase">1. BASE COLOR</label>
-            <div className="relative flex flex-wrap gap-4">
-              {baseColors.map(c => (
+            <div className="flex items-center justify-between">
+              <label className="text-[#c19b38] text-[10.5px] font-bold tracking-widest uppercase">
+                1. BASE COLOR
+              </label>
+              <span className="text-[11px] font-mono font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                {baseColor.toUpperCase()}
+              </span>
+            </div>
+            <div className="relative flex flex-wrap gap-4 items-center">
+              {baseColors.map(c => {
+                const isActive = baseColor.toLowerCase() === c.hex.toLowerCase();
+                return (
+                  <button
+                    key={c.name}
+                    type="button"
+                    onClick={() => setBaseColor(c.hex)}
+                    className={`w-9 h-9 rounded-full transition-all duration-200 cursor-pointer ${
+                      isActive
+                        ? 'border-[3px] border-[#c19b38] ring-2 ring-offset-2 ring-[#c19b38]/50 scale-110 shadow-md'
+                        : 'border border-gray-200 hover:scale-105 shadow-xs'
+                    }`}
+                    style={{ backgroundColor: c.hex }}
+                    title={c.name}
+                  />
+                );
+              })}
+              
+              {/* Circular Dashed Button with + icon opening COLORS popover card */}
+              <div className="relative w-9 h-9">
                 <button
-                  key={c.name}
-                  onClick={() => setBaseColor(c.hex)}
-                  className={`w-9 h-9 rounded-full border-[3px] transition-all duration-200 ${baseColor === c.hex ? 'border-[#c19b38] scale-110 shadow-md' : 'border-transparent hover:scale-105 shadow-sm'}`}
-                  style={{ backgroundColor: c.hex }}
-                  title={c.name}
-                />
-              ))}
-              <div className="relative w-9 h-9 group">
-                <button
+                  type="button"
                   onClick={() => setOpenPicker(openPicker === 'base' ? null : 'base')}
-                  className="absolute inset-0 flex items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-gray-400 group-hover:border-[#c19b38] group-hover:text-[#c19b38] transition-colors bg-white outline-none focus:outline-none z-10"
-                  title="Pick custom base color"
+                  className={`w-9 h-9 rounded-full border-2 border-dashed flex items-center justify-center transition-all cursor-pointer ${
+                    openPicker === 'base' || isCustomBase
+                      ? 'border-[#c19b38] text-[#c19b38] bg-amber-50/50 scale-105 ring-2 ring-[#c19b38]/30 shadow-xs'
+                      : 'border-[#c19b38] text-[#c19b38] hover:bg-amber-50/40 hover:scale-105'
+                  }`}
+                  title="Choose from full 72-color palette"
                 >
                   <Plus size={16} strokeWidth={2.5} />
                 </button>
-                {renderPalette(setBaseColor, 'base')}
+                {renderPalette(setBaseColor, 'base', baseColor)}
               </div>
             </div>
           </div>
 
-          {/* Single Border Select */}
+          {/* 2. Single Border Select */}
           <div className="flex flex-col gap-2">
-            <label className="text-[#c19b38] text-[10.5px] font-bold tracking-widest uppercase">2. SINGLE BORDER COLOR</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[#c19b38] text-[10.5px] font-bold tracking-widest uppercase">
+                2. SINGLE BORDER COLOR
+              </label>
+              <span className="text-[11px] font-mono font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                {singleBorderColor === 'transparent' ? 'NONE' : singleBorderColor.toUpperCase()}
+              </span>
+            </div>
             <div className="relative flex flex-wrap gap-4 items-center">
-              {singleBorderColors.map(c => (
+              {singleBorderColors.map(c => {
+                const isActive = singleBorderColor.toLowerCase() === c.hex.toLowerCase();
+                return (
+                  <button
+                    key={c.name}
+                    type="button"
+                    onClick={() => setSingleBorderColor(c.hex)}
+                    className={`w-9 h-9 rounded-full transition-all duration-200 flex items-center justify-center cursor-pointer ${
+                      isActive
+                        ? 'border-[3px] border-[#c19b38] ring-2 ring-offset-2 ring-[#c19b38]/50 scale-110 shadow-md'
+                        : 'border border-gray-200 hover:scale-105 shadow-xs'
+                    }`}
+                    style={{ backgroundColor: c.hex === 'transparent' ? '#f8f8f8' : c.hex }}
+                    title={c.name}
+                  >
+                    {c.hex === 'transparent' && <span className="text-[8px] font-bold text-gray-400">NONE</span>}
+                  </button>
+                );
+              })}
+
+              {/* Circular Dashed Button with + icon for Single Border */}
+              <div className="relative w-9 h-9">
                 <button
-                  key={c.name}
-                  onClick={() => setSingleBorderColor(c.hex)}
-                  className={`w-9 h-9 rounded-full border-[3px] transition-all duration-200 flex items-center justify-center ${singleBorderColor === c.hex ? 'border-[#c19b38] scale-110 shadow-md' : 'border-transparent hover:scale-105 shadow-sm'}`}
-                  style={{ backgroundColor: c.hex === 'transparent' ? '#f8f8f8' : c.hex }}
-                  title={c.name}
-                >
-                  {c.hex === 'transparent' && <span className="text-[8px] font-bold text-gray-400">NONE</span>}
-                </button>
-              ))}
-              <div className="relative w-9 h-9 group">
-                <button
+                  type="button"
                   onClick={() => setOpenPicker(openPicker === 'single' ? null : 'single')}
-                  className="absolute inset-0 flex items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-gray-400 group-hover:border-[#c19b38] group-hover:text-[#c19b38] transition-colors bg-white outline-none focus:outline-none z-10"
+                  className={`w-9 h-9 rounded-full border-2 border-dashed flex items-center justify-center transition-all cursor-pointer ${
+                    openPicker === 'single' || isCustomSingle
+                      ? 'border-[#c19b38] text-[#c19b38] bg-amber-50/50 scale-105 ring-2 ring-[#c19b38]/30 shadow-xs'
+                      : 'border-gray-300 text-gray-400 hover:border-[#c19b38] hover:text-[#c19b38] hover:scale-105'
+                  }`}
                   title="Pick custom single border color"
                 >
                   <Plus size={16} strokeWidth={2.5} />
                 </button>
-                {renderPalette(setSingleBorderColor, 'single')}
+                {renderPalette(setSingleBorderColor, 'single', singleBorderColor)}
               </div>
             </div>
           </div>
 
-          {/* Double Border Select */}
+          {/* 3. Double Border Select */}
           <div className="flex flex-col gap-2">
-            <label className="text-[#c19b38] text-[10.5px] font-bold tracking-widest uppercase">3. DOUBLE BORDER COLOR</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[#c19b38] text-[10.5px] font-bold tracking-widest uppercase">
+                3. DOUBLE BORDER COLOR
+              </label>
+              <span className="text-[11px] font-mono font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                {doubleBorderColor === 'transparent' ? 'NONE' : doubleBorderColor.toUpperCase()}
+              </span>
+            </div>
             <div className="relative flex flex-wrap gap-4 items-center">
-              {doubleBorderColors.map(c => (
+              {doubleBorderColors.map(c => {
+                const isActive = doubleBorderColor.toLowerCase() === c.hex.toLowerCase();
+                return (
+                  <button
+                    key={c.name}
+                    type="button"
+                    onClick={() => setDoubleBorderColor(c.hex)}
+                    className={`w-9 h-9 rounded-full transition-all duration-200 flex items-center justify-center cursor-pointer ${
+                      isActive
+                        ? 'border-[3px] border-[#c19b38] ring-2 ring-offset-2 ring-[#c19b38]/50 scale-110 shadow-md'
+                        : 'border border-gray-200 hover:scale-105 shadow-xs'
+                    }`}
+                    style={{ backgroundColor: c.hex === 'transparent' ? '#f8f8f8' : c.hex }}
+                    title={c.name}
+                  >
+                    {c.hex === 'transparent' && <span className="text-[8px] font-bold text-gray-400">NONE</span>}
+                  </button>
+                );
+              })}
+
+              {/* Circular Dashed Button with + icon for Double Border */}
+              <div className="relative w-9 h-9">
                 <button
-                  key={c.name}
-                  onClick={() => setDoubleBorderColor(c.hex)}
-                  className={`w-9 h-9 rounded-full border-[3px] transition-all duration-200 flex items-center justify-center ${doubleBorderColor === c.hex ? 'border-[#c19b38] scale-110 shadow-md' : 'border-transparent hover:scale-105 shadow-sm'}`}
-                  style={{ backgroundColor: c.hex === 'transparent' ? '#f8f8f8' : c.hex }}
-                  title={c.name}
-                >
-                  {c.hex === 'transparent' && <span className="text-[8px] font-bold text-gray-400">NONE</span>}
-                </button>
-              ))}
-              <div className="relative w-9 h-9 group">
-                <button
+                  type="button"
                   onClick={() => setOpenPicker(openPicker === 'double' ? null : 'double')}
-                  className="absolute inset-0 flex items-center justify-center rounded-full border-2 border-dashed border-gray-300 text-gray-400 group-hover:border-[#c19b38] group-hover:text-[#c19b38] transition-colors bg-white outline-none focus:outline-none z-10"
+                  className={`w-9 h-9 rounded-full border-2 border-dashed flex items-center justify-center transition-all cursor-pointer ${
+                    openPicker === 'double' || isCustomDouble
+                      ? 'border-[#c19b38] text-[#c19b38] bg-amber-50/50 scale-105 ring-2 ring-[#c19b38]/30 shadow-xs'
+                      : 'border-gray-300 text-gray-400 hover:border-[#c19b38] hover:text-[#c19b38] hover:scale-105'
+                  }`}
                   title="Pick custom double border color"
                 >
                   <Plus size={16} strokeWidth={2.5} />
                 </button>
-                {renderPalette(setDoubleBorderColor, 'double')}
+                {renderPalette(setDoubleBorderColor, 'double', doubleBorderColor)}
               </div>
             </div>
           </div>
 
-          {/* Text Input */}
+          {/* 4. Embroidery Text Input */}
           <div className="flex flex-col gap-2">
-            <label className="text-[#c19b38] text-[10.5px] font-bold tracking-widest uppercase">4. EMBROIDERY TEXT</label>
+            <label className="text-[#c19b38] text-[10.5px] font-bold tracking-widest uppercase">
+              4. EMBROIDERY TEXT
+            </label>
             <input
               type="text"
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Enter custom text..."
-              className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-[14px] px-5 py-3 text-sm font-semibold focus:outline-none focus:border-[#c19b38] focus:bg-white transition-all shadow-sm focus:shadow-md"
+              placeholder="CLASS OF 2026"
+              className="w-full bg-gray-50/80 border border-gray-200 text-gray-900 rounded-[14px] px-5 py-3 text-sm font-semibold focus:outline-none focus:border-[#c19b38] focus:bg-white transition-all shadow-xs focus:shadow-md uppercase tracking-wider"
             />
           </div>
 
-          {/* Font Style Buttons */}
+          {/* 5. Font Style Buttons */}
           <div className="flex flex-col gap-2">
-            <label className="text-[#c19b38] text-[10.5px] font-bold tracking-widest uppercase">5. FONT STYLE</label>
+            <label className="text-[#c19b38] text-[10.5px] font-bold tracking-widest uppercase">
+              5. FONT STYLE
+            </label>
             <div className="flex gap-3">
               {['Serif', 'Modern', 'Classic'].map(f => (
                 <button
                   key={f}
+                  type="button"
                   onClick={() => setFontStyle(f)}
-                  className={`flex-1 rounded-[12px] py-2.5 text-sm transition-all duration-200 ${fontStyle === f ? 'bg-gray-900 border border-gray-900 text-white shadow-md font-bold' : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-400 font-medium'}`}
+                  className={`flex-1 rounded-[12px] py-2.5 text-sm transition-all duration-200 cursor-pointer ${
+                    fontStyle === f 
+                      ? 'bg-gray-900 border border-gray-900 text-white shadow-md font-bold' 
+                      : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-400 font-medium'
+                  }`}
                 >
                   {f}
                 </button>
               ))}
-              <div className="relative w-[3.25rem] group">
+              <div className="relative w-[3.25rem]">
                 <button
+                  type="button"
                   onClick={() => setOpenPicker(openPicker === 'font' ? null : 'font')}
-                  className={`w-full h-full flex items-center justify-center rounded-[12px] border transition-colors outline-none focus:outline-none z-10 ${!['Serif', 'Modern', 'Classic'].includes(fontStyle) ? 'bg-gray-900 border-gray-900 text-white shadow-md' : 'border-gray-200 text-gray-400 hover:border-[#c19b38] hover:text-[#c19b38] bg-white'}`}
+                  className={`w-full h-full flex items-center justify-center rounded-[12px] border transition-colors outline-none focus:outline-none cursor-pointer ${
+                    !['Serif', 'Modern', 'Classic'].includes(fontStyle)
+                      ? 'bg-gray-900 border-gray-900 text-white shadow-md'
+                      : 'border-gray-200 text-gray-400 hover:border-[#c19b38] hover:text-[#c19b38] bg-white'
+                  }`}
                   title="More fonts"
                 >
                   <Plus size={16} strokeWidth={2.5} />

@@ -48,6 +48,7 @@ export function applyOverrideToProduct(
 
   return {
     ...product,
+    title: override.title && override.title.trim().length > 0 ? override.title.trim() : product.title,
     inStock: override.inStock !== undefined ? override.inStock : product.inStock,
     variants: {
       ...product.variants,
@@ -175,11 +176,9 @@ export async function saveProductOverride(
     console.warn('Failed to save to localStorage:', e);
   }
 
-  // 3. Upsert into Supabase
+  // 3. Persist into Supabase sash_products table
   try {
-    const payload = {
-      id: override.id || override.slug,
-      slug: override.slug,
+    const updateFields: Record<string, any> = {
       title: override.title,
       in_stock: override.inStock,
       without_lace_actual: override.withoutLaceActual,
@@ -189,16 +188,44 @@ export async function saveProductOverride(
       updated_at: new Date().toISOString(),
     };
 
-    const { error } = await supabase
+    // First attempt direct update by slug (guarantees seamless update on existing records across all browsers)
+    const { data: updatedRows, error: updateError } = await supabase
+      .from('sash_products')
+      .update(updateFields)
+      .eq('slug', override.slug)
+      .select('id, slug, title');
+
+    if (!updateError && updatedRows && updatedRows.length > 0) {
+      return { success: true };
+    }
+
+    // If row didn't exist yet, perform upsert / insert
+    const payload = {
+      id: override.id || override.slug,
+      slug: override.slug,
+      ...updateFields,
+    };
+
+    const { error: upsertSlugError } = await supabase
       .from('sash_products')
       .upsert(payload, { onConflict: 'slug' });
 
-    if (error) {
-      console.warn('Supabase upsert warning (check if table exists):', error.message);
-      return { success: false, error: error.message };
+    if (!upsertSlugError) {
+      return { success: true };
     }
 
-    return { success: true };
+    // Fallback upsert on primary key id
+    const { error: upsertIdError } = await supabase
+      .from('sash_products')
+      .upsert(payload, { onConflict: 'id' });
+
+    if (!upsertIdError) {
+      return { success: true };
+    }
+
+    const errMessage = upsertIdError.message || upsertSlugError.message || updateError?.message;
+    console.warn('Supabase save warning (ensure title column exists):', errMessage);
+    return { success: false, error: errMessage };
   } catch (err: any) {
     console.error('Supabase save error:', err);
     return { success: false, error: err?.message || 'Database connection error' };

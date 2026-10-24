@@ -18,13 +18,23 @@ import {
   Bookmark,
   Wand2,
   Award,
-  Scissors
+  Scissors,
+  Palette,
+  Pipette,
+  Plus,
+  X
 } from 'lucide-react';
 import {
   SashProductConfig,
   VariantDetails,
   ProductColor
 } from '@/data/sashesData';
+import { 
+  FULL_COLOR_PALETTE, 
+  COLOR_PALETTE_ROWS, 
+  getColorNameFromHex, 
+  formatColorWithHex 
+} from '@/utils/colorPalette';
 import EnquiryModal from '@/components/Sashes/EnquiryModal';
 import Customizer from '@/components/Customizer/Customizer';
 import {
@@ -49,6 +59,9 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
 
   const [selectedVariantKey, setSelectedVariantKey] = useState<'withoutLace' | 'withLace'>('withLace');
   const [selectedColor, setSelectedColor] = useState<ProductColor>(initialProduct.colors[0]);
+  const [showFullPalette, setShowFullPalette] = useState<boolean>(false);
+  const [customHex, setCustomHex] = useState<string>(initialProduct.colors[0]?.hex || '#d4af37');
+  const [isCustomColorActive, setIsCustomColorActive] = useState<boolean>(false);
   const [activeImage, setActiveImage] = useState<string>(initialProduct.variants.withLace.images[0]);
   const [quantity, setQuantity] = useState<number>(1);
   const [isQtySaved, setIsQtySaved] = useState<boolean>(false);
@@ -58,6 +71,7 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
   const [isZoomOpen, setIsZoomOpen] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'details' | 'specs' | 'faqs'>('details');
   const [customizerNotes, setCustomizerNotes] = useState<string>('');
+  const [isMatrixPickerOpen, setIsMatrixPickerOpen] = useState<boolean>(false);
 
   // Update internal product when initialProduct changes (e.g. page navigation)
   // and load live overrides from Supabase & cache post-hydration
@@ -93,12 +107,42 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
     };
   }, [initialProduct.slug]);
 
+  // Dynamically synchronize the browser tab title with the live database title in all browsers
+  useEffect(() => {
+    if (product.title && typeof document !== 'undefined') {
+      document.title = `${product.title} | SashCraft Artisanal Regalia`;
+    }
+  }, [product.title]);
+
   const currentVariant: VariantDetails = product.variants[selectedVariantKey];
 
   // Whenever variant changes, default the active image to that variant's primary image
   const handleVariantSelect = (key: 'withoutLace' | 'withLace') => {
     setSelectedVariantKey(key);
     setActiveImage(product.variants[key].images[0]);
+  };
+
+  const handleSelectColor = (color: ProductColor) => {
+    setSelectedColor(color);
+    setCustomHex(color.hex);
+    setIsCustomColorActive(false);
+  };
+
+  const handleCustomColorChange = (hexValue: string) => {
+    let clean = hexValue.trim();
+    if (!clean.startsWith('#') && clean.length > 0) {
+      clean = `#${clean}`;
+    }
+    setCustomHex(clean);
+    if (/^#[0-9A-Fa-f]{3,6}$/.test(clean)) {
+      setSelectedColor({
+        id: 'custom',
+        name: `Custom Shade (${clean.toUpperCase()})`,
+        hex: clean,
+        borderHex: '#dfad2d',
+      });
+      setIsCustomColorActive(true);
+    }
   };
 
   // Determine bulk discount tier based on quantity
@@ -519,41 +563,196 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
               </div>
             </div>
 
-            {/* COLOR SELECTION */}
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-gray-900 uppercase tracking-wider">
-                  Fabric Color: <span className="text-[#b8860b]">{selectedColor.name}</span>
+            {/* FULL COLOR PALETTE & CUSTOM COLOR SELECTION */}
+            <div className="space-y-3 p-4 bg-white rounded-3xl border border-gray-200/90 shadow-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-2.5">
+                <label className="text-xs font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2 flex-wrap">
+                  <span
+                    className="w-4 h-4 rounded-full inline-block border border-gray-400 shadow-xs shrink-0"
+                    style={{ backgroundColor: selectedColor.hex }}
+                  />
+                  <span>
+                    Fabric Color: <strong className="text-[#b8860b] normal-case">{selectedColor.name}</strong>
+                  </span>
+                  <span className="text-[10px] font-mono font-bold bg-amber-50 text-[#b8860b] px-1.5 py-0.5 rounded border border-[#dfad2d]/30">
+                    {selectedColor.hex}
+                  </span>
                 </label>
-                <span className="text-[11px] text-gray-400">{product.colors.length} Available Shades</span>
+
+                <button
+                  type="button"
+                  onClick={() => setShowFullPalette(!showFullPalette)}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#b8860b] hover:text-[#8f6906] transition-colors cursor-pointer self-start sm:self-auto bg-amber-50/70 hover:bg-amber-100/60 px-2.5 py-1 rounded-full border border-[#dfad2d]/20"
+                >
+                  <Palette size={13} />
+                  <span>{showFullPalette ? 'Show Signature Colors' : `Full Color Palette (${FULL_COLOR_PALETTE.length}+ Shades)`}</span>
+                </button>
               </div>
 
-              <div className="flex items-center gap-3 flex-wrap">
-                {product.colors.map((color) => {
-                  const isColorActive = selectedColor.id === color.id;
+              {/* Swatches Grid */}
+              <div className="flex items-center gap-2.5 flex-wrap pt-1">
+                {(showFullPalette ? FULL_COLOR_PALETTE : product.colors).map((color) => {
+                  const isColorActive = !isCustomColorActive && selectedColor.id === color.id;
                   return (
                     <button
                       key={color.id}
                       type="button"
-                      onClick={() => setSelectedColor(color)}
-                      className={`relative w-9 h-9 rounded-full border-2 transition-transform hover:scale-110 flex items-center justify-center ${
+                      onClick={() => handleSelectColor(color)}
+                      className={`group relative w-9 h-9 rounded-full border-2 transition-all hover:scale-110 flex items-center justify-center cursor-pointer shadow-xs ${
                         isColorActive
-                          ? 'border-[#dfad2d] ring-2 ring-[#dfad2d]/30 scale-105'
-                          : 'border-gray-300'
+                          ? 'border-[#dfad2d] ring-2 ring-[#dfad2d]/40 scale-105'
+                          : 'border-gray-200 hover:border-gray-400'
                       }`}
                       style={{ backgroundColor: color.hex }}
-                      title={color.name}
+                      title={`${color.name} (${color.hex})`}
                     >
                       {isColorActive && (
                         <Check
                           size={14}
-                          className={color.id === 'white' || color.id === 'ivory-black' || color.id === 'gold' ? 'text-gray-900' : 'text-white'}
+                          className={
+                            color.id === 'white' || color.hex.toLowerCase() === '#fcfcfc' || color.hex.toLowerCase() === '#ffffff' || color.id === 'gold'
+                              ? 'text-gray-900'
+                              : 'text-white'
+                          }
                           strokeWidth={3}
                         />
                       )}
                     </button>
                   );
                 })}
+
+                {/* Circular Dashed Button with + icon opening COLORS popover card */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsMatrixPickerOpen(!isMatrixPickerOpen)}
+                    className={`w-9 h-9 rounded-full border-2 border-dashed flex items-center justify-center transition-all cursor-pointer ${
+                      isMatrixPickerOpen
+                        ? 'border-[#dfad2d] text-[#b8860b] bg-amber-50 ring-2 ring-[#dfad2d]/40 scale-105'
+                        : 'border-[#dfad2d] text-[#b8860b] hover:bg-amber-50/50 hover:scale-105'
+                    }`}
+                    title="Open 72-color matrix popover"
+                  >
+                    <Plus size={16} strokeWidth={2.5} />
+                  </button>
+
+                  {/* Popover Card matching the user design */}
+                  {isMatrixPickerOpen && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-40 bg-black/5"
+                        onClick={() => setIsMatrixPickerOpen(false)}
+                      />
+                      <div 
+                        onClick={(e) => e.stopPropagation()}
+                        className="absolute z-50 bg-white p-3.5 sm:p-4 rounded-2xl shadow-2xl border border-gray-100 flex flex-col gap-2.5 animate-in fade-in zoom-in-95 duration-150 top-12 left-0 sm:left-auto sm:right-0 md:left-full md:right-auto md:ml-3 md:-top-6 w-[232px] sm:w-[248px]"
+                      >
+                        <div className="flex justify-between items-center w-full pb-0.5">
+                          <span className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">
+                            COLORS
+                          </span>
+                          <button 
+                            type="button"
+                            onClick={() => setIsMatrixPickerOpen(false)}
+                            className="text-gray-400 hover:text-gray-800 transition-colors p-1 rounded-md hover:bg-gray-100 cursor-pointer"
+                            title="Close palette"
+                          >
+                            <X size={15} strokeWidth={2.5} />
+                          </button>
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          {COLOR_PALETTE_ROWS.map((row, rowIdx) => (
+                            <div key={rowIdx} className="grid grid-cols-8 gap-1">
+                              {row.map((item) => {
+                                const isSelected = selectedColor.hex.toLowerCase() === item.hex.toLowerCase();
+                                return (
+                                  <button
+                                    key={item.hex}
+                                    type="button"
+                                    onClick={() => {
+                                      handleSelectColor({
+                                        id: `matrix-${item.hex.replace('#', '')}`,
+                                        name: item.name,
+                                        hex: item.hex,
+                                        borderHex: '#dfad2d',
+                                      });
+                                      setIsMatrixPickerOpen(false);
+                                    }}
+                                    className={`w-[22px] h-[22px] sm:w-[24px] sm:h-[24px] rounded-[4px] transition-all cursor-pointer relative shadow-xs hover:scale-125 hover:z-20 hover:shadow-md ${
+                                      isSelected
+                                        ? "ring-2 ring-black ring-offset-1 scale-110 z-10"
+                                        : "border border-black/10 hover:border-black/30"
+                                    }`}
+                                    style={{ backgroundColor: item.hex }}
+                                    title={`${item.name} (${item.hex.toUpperCase()})`}
+                                  />
+                                );
+                              })}
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-600">
+                          <span className="truncate font-medium">{selectedColor.name}</span>
+                          <span className="font-mono font-bold text-[10px] bg-amber-50 text-[#b8860b] px-1.5 py-0.5 rounded border border-[#dfad2d]/30">
+                            {selectedColor.hex.toUpperCase()}
+                          </span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Show toggle button when not in full palette mode */}
+                {!showFullPalette && (
+                  <button
+                    type="button"
+                    onClick={() => setShowFullPalette(true)}
+                    className="h-9 px-3 rounded-full border border-dashed border-[#dfad2d] text-[#b8860b] hover:bg-amber-50/50 text-[11px] font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                    title="View all 20+ fabric shades"
+                  >
+                    <Plus size={12} />
+                    <span>+{FULL_COLOR_PALETTE.length - product.colors.length} More Shades</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Custom Color Wheel & HEX Input Bar */}
+              <div className="pt-2.5 border-t border-gray-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-gray-50/70 p-3 rounded-2xl border border-gray-200/80">
+                <div className="flex items-center gap-3">
+                  <div className="relative w-9 h-9 rounded-xl overflow-hidden border border-gray-300 shrink-0 cursor-pointer shadow-xs hover:border-[#dfad2d] transition-colors">
+                    <input
+                      type="color"
+                      value={customHex.startsWith('#') && customHex.length === 7 ? customHex : '#d4af37'}
+                      onChange={(e) => handleCustomColorChange(e.target.value)}
+                      className="absolute -top-3 -left-3 w-16 h-16 cursor-pointer border-0 p-0"
+                      title="Click to open full color wheel"
+                    />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1">
+                      <Pipette size={11} className="text-[#dfad2d]" /> Custom Color Wheel & HEX:
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <input
+                        type="text"
+                        value={customHex}
+                        onChange={(e) => handleCustomColorChange(e.target.value)}
+                        placeholder="#7B1FA2"
+                        maxLength={7}
+                        className="w-24 px-2 py-0.5 bg-white border border-gray-300 focus:border-[#dfad2d] rounded-lg text-xs font-mono font-bold text-gray-900 uppercase focus:outline-none shadow-xs"
+                      />
+                      <span className="text-[11px] text-gray-500 hidden sm:inline">Pick any shade or enter college HEX</span>
+                    </div>
+                  </div>
+                </div>
+
+                {isCustomColorActive && (
+                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 self-start sm:self-auto flex items-center gap-1">
+                    <CheckCircle2 size={12} /> Custom Color Active
+                  </span>
+                )}
               </div>
             </div>
 
@@ -689,7 +888,15 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
             initialBaseColor={selectedColor.hex}
             buttonLabel="Transfer Custom Design To Enquiry"
             onEnquireCustom={({ baseColor, singleBorderColor, doubleBorderColor, text, fontStyle }) => {
-              const notes = `Custom Design Specifications:\n• Custom Lettering: "${text}"\n• Typography: ${fontStyle}\n• Base Fabric Color: ${baseColor}\n• Primary Border: ${singleBorderColor}\n• Accent Border: ${doubleBorderColor}`;
+              const baseName = getColorNameFromHex(baseColor);
+              const customCol: ProductColor = {
+                id: `custom-${baseColor.replace('#', '')}`,
+                name: baseName,
+                hex: baseColor,
+                borderHex: '#dfad2d',
+              };
+              setSelectedColor(customCol);
+              const notes = `Custom Design Specifications:\n• Custom Lettering: "${text}"\n• Typography: ${fontStyle}\n• Base Fabric Color: ${formatColorWithHex(baseName, baseColor)}\n• Primary Border: ${singleBorderColor === 'transparent' ? 'None' : formatColorWithHex(getColorNameFromHex(singleBorderColor), singleBorderColor)}\n• Accent Border: ${doubleBorderColor === 'transparent' ? 'None' : formatColorWithHex(getColorNameFromHex(doubleBorderColor), doubleBorderColor)}`;
               setCustomizerNotes(notes);
               setIsEnquiryOpen(true);
             }}

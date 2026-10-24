@@ -11,6 +11,7 @@ import {
   checkSupabaseConnection,
   applyOverrideToProduct,
 } from '@/utils/productPricing';
+import { extractHexFromColor } from '@/utils/colorPalette';
 import {
   LayoutDashboard,
   Inbox,
@@ -458,6 +459,12 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
     );
   };
 
+  const handleTitleChange = (slug: string, newTitle: string) => {
+    setProductsList((prev) =>
+      prev.map((prod) => (prod.slug === slug ? { ...prod, title: newTitle } : prod))
+    );
+  };
+
   // Save Product Overrides to Storage, Broadcast to Website, & Upsert to Supabase
   const saveAllProducts = async (targetSlug?: string) => {
     setIsSavingProduct(targetSlug || 'all');
@@ -494,17 +501,18 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
     checkSupabaseConnection().then((res) => setDbStatus(res));
 
     if (allSucceeded) {
+      const targetProd = targets[0];
       setSavedProductToast(
-        targetSlug
-          ? `✓ Pricing saved & synced live for ${targetSlug}!`
-          : '✓ All product prices saved & synced live with Supabase & storefront!'
+        targetSlug && targetProd
+          ? `✓ Title "${targetProd.title}", pricing & stock saved to Supabase & live across all browsers!`
+          : '✓ All product titles, prices & stock saved to Supabase & live across all browsers!'
       );
     } else {
       setSavedProductToast(
-        `✓ Updated on website locally! (To sync cloud database, run the SQL script in Supabase: ${anySupabaseError || ''})`
+        `⚠ Updated locally! To sync across all browsers, run SQL: ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS title TEXT; (${anySupabaseError || 'Check Supabase table'})`
       );
     }
-    setTimeout(() => setSavedProductToast(null), 4500);
+    setTimeout(() => setSavedProductToast(null), 5500);
   };
 
   // Add demo enquiry
@@ -900,8 +908,19 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
                             )}
                           </td>
                           <td className="py-3 px-4">
-                            <div className="text-gray-200">{enq.product_name}</div>
-                            <div className="text-[10px] text-gray-400">{enq.variant} • {enq.color}</div>
+                            <div className="text-gray-200 font-medium">{enq.product_name}</div>
+                            <div className="text-[10px] text-gray-400 flex items-center gap-1.5 mt-0.5">
+                              <span>{enq.variant}</span>
+                              <span>•</span>
+                              {extractHexFromColor(enq.color) && (
+                                <span
+                                  className="w-2.5 h-2.5 rounded-full border border-white/30 shrink-0 shadow-xs inline-block"
+                                  style={{ backgroundColor: extractHexFromColor(enq.color)! }}
+                                  title={`HEX: ${extractHexFromColor(enq.color)}`}
+                                />
+                              )}
+                              <span className="text-gray-300 font-mono text-[10px]">{enq.color}</span>
+                            </div>
                           </td>
                           <td className="py-3 px-4 font-bold text-white">{enq.quantity} pcs</td>
                           <td className="py-3 px-4 font-serif font-bold text-[#dfad2d]">₹{enq.total_price.toLocaleString()}</td>
@@ -1046,7 +1065,16 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
                             <td className="py-3.5 px-4">
                               <div className="font-semibold text-gray-200">{enq.product_name}</div>
                               <div className="text-[11px] text-[#dfad2d]/90 font-medium">{enq.variant}</div>
-                              <div className="text-[10px] text-gray-500">Color: {enq.color}</div>
+                              <div className="flex items-center gap-1.5 mt-1 text-[11px]">
+                                {extractHexFromColor(enq.color) && (
+                                  <span
+                                    className="w-3.5 h-3.5 rounded-full border border-white/40 shrink-0 shadow-xs"
+                                    style={{ backgroundColor: extractHexFromColor(enq.color)! }}
+                                    title={`HEX: ${extractHexFromColor(enq.color)}`}
+                                  />
+                                )}
+                                <span className="text-gray-300 font-mono text-[11px]">{enq.color}</span>
+                              </div>
                             </td>
                             <td className="py-3.5 px-4">
                               <div className="font-bold text-white">{enq.quantity} units</div>
@@ -1149,10 +1177,26 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
                       </div>
 
                       <div className="p-3 rounded-xl bg-black/30 border border-gray-800">
-                        <span className="text-gray-500 block mb-1">Product</span>
-                        <strong className="text-[#dfad2d]">{selectedEnquiry.product_name}</strong>
-                        <div className="text-white mt-1">{selectedEnquiry.variant}</div>
-                        <div className="text-gray-400">Color: {selectedEnquiry.color}</div>
+                        <span className="text-gray-500 block mb-1">Product & Fabric Color</span>
+                        <strong className="text-[#dfad2d] text-sm block">{selectedEnquiry.product_name}</strong>
+                        <div className="text-white text-xs mt-1">{selectedEnquiry.variant}</div>
+                        <div className="flex items-center gap-2 mt-2 p-2 bg-black/50 rounded-lg border border-gray-800">
+                          {extractHexFromColor(selectedEnquiry.color) && (
+                            <span
+                              className="w-5 h-5 rounded-full border-2 border-white/50 shrink-0 shadow-sm"
+                              style={{ backgroundColor: extractHexFromColor(selectedEnquiry.color)! }}
+                              title={`HEX: ${extractHexFromColor(selectedEnquiry.color)}`}
+                            />
+                          )}
+                          <div className="flex flex-col">
+                            <span className="text-xs font-semibold text-white">{selectedEnquiry.color}</span>
+                            {extractHexFromColor(selectedEnquiry.color) && (
+                              <span className="text-[10px] font-mono text-amber-400">
+                                HEX: {extractHexFromColor(selectedEnquiry.color)}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
 
                       <div className="p-3 rounded-xl bg-black/30 border border-gray-800">
@@ -1350,23 +1394,41 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
                     key={product.slug}
                     className="p-6 rounded-3xl bg-[#111520] border border-gray-800 shadow-md space-y-5"
                   >
-                    {/* Header */}
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <span className="text-[10px] font-bold text-[#dfad2d] tracking-widest uppercase bg-[#dfad2d]/10 px-2.5 py-0.5 rounded-full border border-[#dfad2d]/30">
-                          {product.category}
-                        </span>
-                        <h3 className="text-lg font-serif font-bold text-white mt-1.5">
-                          {product.title}
-                        </h3>
-                        <span className="text-[11px] text-gray-500 font-mono">
-                          Route: /sashes/{product.slug} • SKU: {product.sku}
+                    {/* Header with Editable Dynamic Title */}
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+                      <div className="flex-1 w-full space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold text-[#dfad2d] tracking-widest uppercase bg-[#dfad2d]/10 px-2.5 py-0.5 rounded-full border border-[#dfad2d]/30">
+                            {product.category}
+                          </span>
+                          <span className="text-[10px] text-gray-500 font-mono">
+                            SKU: {product.sku}
+                          </span>
+                        </div>
+
+                        {/* Editable Product Title Input */}
+                        <div>
+                          <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1 flex items-center gap-1.5">
+                            <Tags size={12} className="text-[#dfad2d]" />
+                            Product Title (Editable & Live Dynamic):
+                          </label>
+                          <input
+                            type="text"
+                            value={product.title}
+                            onChange={(e) => handleTitleChange(product.slug, e.target.value)}
+                            placeholder="Enter Product Title..."
+                            className="w-full px-3.5 py-2 bg-black/60 border border-gray-700 focus:border-[#dfad2d] rounded-xl text-sm font-serif font-bold text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-[#dfad2d] transition-all"
+                          />
+                        </div>
+
+                        <span className="text-[11px] text-gray-500 font-mono block">
+                          Live Store Route: /sashes/{product.slug}
                         </span>
                       </div>
 
                       {/* In-Stock Toggle */}
-                      <label className="flex items-center gap-2 cursor-pointer bg-black/40 px-3 py-1.5 rounded-xl border border-gray-800">
-                        <span className="text-xs text-gray-400">
+                      <label className="flex items-center gap-2 cursor-pointer bg-black/40 px-3.5 py-2 rounded-xl border border-gray-800 shrink-0 self-start">
+                        <span className="text-xs font-semibold text-gray-300">
                           {product.inStock ? 'In-Stock' : 'Out of Stock'}
                         </span>
                         <input

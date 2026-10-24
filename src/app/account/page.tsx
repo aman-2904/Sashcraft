@@ -40,6 +40,7 @@ import { getWishlist, toggleWishlist, WISHLIST_UPDATED_EVENT } from '@/utils/wis
 import { sashesCatalog, SashProductConfig } from '@/data/sashesData';
 import UserAuthModal from '@/components/Auth/UserAuthModal';
 import { getWhatsAppSupportUrl, WHATSAPP_DISPLAY_NUMBER } from '@/utils/contact';
+import { extractHexFromColor } from '@/utils/colorPalette';
 
 function AccountDashboardContent() {
   const searchParams = useSearchParams();
@@ -795,7 +796,18 @@ function AccountDashboardContent() {
                         <div>
                           <span className="text-gray-400 block mb-0.5">Sash Product</span>
                           <strong className="text-gray-900 block">{ord.product_name}</strong>
-                          <span className="text-gray-600 text-[11px]">{ord.variant} • {ord.color}</span>
+                          <div className="text-gray-600 text-[11px] flex items-center gap-1.5 mt-0.5">
+                            <span>{ord.variant}</span>
+                            <span>•</span>
+                            {extractHexFromColor(ord.color) && (
+                              <span
+                                className="w-2.5 h-2.5 rounded-full border border-gray-400 shrink-0 shadow-xs inline-block"
+                                style={{ backgroundColor: extractHexFromColor(ord.color)! }}
+                                title={`HEX: ${extractHexFromColor(ord.color)}`}
+                              />
+                            )}
+                            <span className="font-medium text-gray-800">{ord.color}</span>
+                          </div>
                         </div>
 
                         <div>

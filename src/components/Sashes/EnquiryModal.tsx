@@ -7,6 +7,7 @@ import { SatinSashProductConfig, VariantDetails, ProductColor } from '@/data/sat
 import { supabase } from '@/utils/supabase/client';
 import { getCachedUserProfile, getUserProfile } from '@/utils/userProfile';
 import { getWhatsAppSupportUrl, WHATSAPP_DISPLAY_NUMBER } from '@/utils/contact';
+import { formatColorWithHex } from '@/utils/colorPalette';
 
 interface EnquiryModalProps {
   isOpen: boolean;
@@ -110,11 +111,13 @@ export default function EnquiryModal({
     setEnquiryRef(refCode);
 
     const nowIso = new Date().toISOString();
+    const formattedColor = formatColorWithHex(selectedColor.name, selectedColor.hex);
+
     const payload = {
       reference_id: refCode,
       product_name: product.title,
       variant: variant.name,
-      color: selectedColor.name,
+      color: formattedColor,
       quantity: Number(quantity) || 1,
       unit_price: Number(unitPrice) || 0,
       total_price: Number(totalPrice) || 0,
@@ -187,10 +190,11 @@ export default function EnquiryModal({
   };
 
   const handleWhatsAppEnquiry = () => {
+    const formattedColor = formatColorWithHex(selectedColor.name, selectedColor.hex);
     const text = `*New Order Enquiry - SashCraft*\n\n` +
       `*Product:* ${product.title}\n` +
       `*Variant:* ${variant.name}\n` +
-      `*Color:* ${selectedColor.name}\n` +
+      `*Color:* ${formattedColor}\n` +
       `*Quantity:* ${quantity} units\n` +
       `*Unit Price:* ${product.currency.symbol}${unitPrice}\n` +
       `*Total Estimate:* ${product.currency.symbol}${totalPrice}\n` +
@@ -250,8 +254,11 @@ export default function EnquiryModal({
               </div>
               <div className="flex items-center gap-3 text-xs text-gray-600">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full inline-block border border-gray-400" style={{ backgroundColor: selectedColor.hex }} />
-                  {selectedColor.name}
+                  <span className="w-3 h-3 rounded-full inline-block border border-gray-400 shadow-xs" style={{ backgroundColor: selectedColor.hex }} />
+                  <span className="font-semibold text-gray-900">{selectedColor.name}</span>
+                  <code className="text-[10px] font-mono bg-amber-50 text-[#b8860b] px-1.5 py-0.5 rounded border border-[#dfad2d]/30 font-bold">
+                    {selectedColor.hex}
+                  </code>
                 </span>
                 <span>•</span>
                 <span>Qty: <strong className="text-gray-900">{quantity} units</strong></span>
