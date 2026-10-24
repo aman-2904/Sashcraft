@@ -4,6 +4,7 @@ export interface UserProfile {
   fullName: string;
   phone: string;
   address: string;
+  role?: 'customer' | 'admin' | 'superadmin';
   createdAt?: string;
   updatedAt?: string;
 }

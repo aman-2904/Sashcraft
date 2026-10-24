@@ -44,21 +44,51 @@ CREATE TABLE IF NOT EXISTS public.enquiries (
 -- Ensure address column exists if table was previously created
 ALTER TABLE public.enquiries ADD COLUMN IF NOT EXISTS address TEXT;
 
--- 3. Create user_profiles table (Customer profile, phone, delivery address)
+-- 3. Create user_profiles table (Customer profile, phone, delivery address, role)
 CREATE TABLE IF NOT EXISTS public.user_profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email TEXT NOT NULL,
     full_name TEXT,
     phone TEXT,
     address TEXT,
+    role TEXT DEFAULT 'customer' NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 4. Enable Row Level Security (RLS) on all tables
+-- Ensure columns exist if table was previously created
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS full_name TEXT;
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'customer';
+
+-- 4. Create admin_users table (Strict administrator authorization registry)
+CREATE TABLE IF NOT EXISTS public.admin_users (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    email TEXT UNIQUE NOT NULL,
+    role TEXT DEFAULT 'admin' NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 5. Enable Row Level Security (RLS) on all tables
 ALTER TABLE public.sash_products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.enquiries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
+
+-- 6. RLS Policies for admin_users:
+DROP POLICY IF EXISTS "Public Read Access on admin_users" ON public.admin_users;
+CREATE POLICY "Public Read Access on admin_users"
+    ON public.admin_users
+    FOR SELECT
+    USING (true);
+
+DROP POLICY IF EXISTS "Allow All Updates on admin_users" ON public.admin_users;
+CREATE POLICY "Allow All Updates on admin_users"
+    ON public.admin_users
+    FOR ALL
+    USING (true)
+    WITH CHECK (true);
 
 -- 5. RLS Policies for sash_products:
 -- Allow anyone (public storefront) to read live products and pricing
@@ -122,6 +152,13 @@ BEGIN
         WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'user_profiles'
     ) THEN
         ALTER PUBLICATION supabase_realtime ADD TABLE public.user_profiles;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_publication_tables 
+        WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'admin_users'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.admin_users;
     END IF;
 END $$;
 

@@ -130,6 +130,7 @@ export default function UserAuthModal({
             full_name: fullName.trim(),
             phone: phone.trim(),
             address: address.trim(),
+            role: 'customer',
           },
         },
       });
@@ -141,13 +142,14 @@ export default function UserAuthModal({
       }
 
       if (data.user) {
-        // Upsert to user_profiles
+        // Upsert to user_profiles with explicit customer role
         await saveUserProfile({
           id: data.user.id,
           email: email.trim(),
           fullName: fullName.trim(),
           phone: phone.trim(),
           address: address.trim(),
+          role: 'customer',
         });
 
         setSuccessMessage('Account created successfully! Welcome to SashCraft.');

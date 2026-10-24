@@ -119,6 +119,7 @@ export async function saveUserProfile(profile: UserProfile): Promise<{ success: 
         full_name: profile.fullName,
         phone: profile.phone,
         address: profile.address,
+        ...(profile.role ? { role: profile.role } : {}),
       },
     });
   } catch (e) {
@@ -136,6 +137,7 @@ export async function saveUserProfile(profile: UserProfile): Promise<{ success: 
           full_name: profile.fullName,
           phone: profile.phone,
           address: profile.address,
+          role: profile.role || 'customer',
           updated_at: new Date().toISOString(),
         });
 

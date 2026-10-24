@@ -18,12 +18,13 @@ import {
   ExternalLink
 } from 'lucide-react';
 import Link from 'next/link';
+import { verifyAdminRole, grantAdminRole, REQUIRED_ADMIN_PASSKEY } from '@/utils/adminAuth';
 
 interface AdminAuthPortalProps {
   onAuthSuccess?: () => void;
 }
 
-export const REQUIRED_ADMIN_PASSKEY = 'SashCraft@2026';
+export { REQUIRED_ADMIN_PASSKEY };
 
 export default function AdminAuthPortal({ onAuthSuccess }: AdminAuthPortalProps) {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
@@ -34,6 +35,8 @@ export default function AdminAuthPortal({ onAuthSuccess }: AdminAuthPortalProps)
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [passkey, setPasskey] = useState('');
+  const [elevationPasskey, setElevationPasskey] = useState('');
+  const [showPasskeyField, setShowPasskeyField] = useState(false);
 
   // UI states
   const [showPassword, setShowPassword] = useState(false);
@@ -64,8 +67,30 @@ export default function AdminAuthPortal({ onAuthSuccess }: AdminAuthPortalProps)
         return;
       }
 
-      if (data.session || data.user) {
-        setSuccessMessage('Authentication verified! Redirecting to command dashboard...');
+      if (data.user) {
+        // Strictly verify that user has the 'admin' role
+        const hasAdminRole = await verifyAdminRole(data.user);
+
+        if (!hasAdminRole) {
+          // If the user provided the master passkey in the elevation field:
+          if (elevationPasskey.trim() === REQUIRED_ADMIN_PASSKEY) {
+            await grantAdminRole(data.user, elevationPasskey);
+            setSuccessMessage('Admin clearance verified via master passkey! Entering dashboard...');
+            if (onAuthSuccess) onAuthSuccess();
+            return;
+          }
+
+          // Otherwise, revoke session and deny access
+          await supabase.auth.signOut();
+          setErrorMessage(
+            `❌ Access Denied: The account '${email.trim()}' is registered with the 'customer' role. The Admin Command Portal is restricted exclusively to administrators.`
+          );
+          setShowPasskeyField(true);
+          setIsLoading(false);
+          return;
+        }
+
+        setSuccessMessage('Admin clearance verified! Entering command dashboard...');
         if (onAuthSuccess) onAuthSuccess();
       }
     } catch (err: unknown) {
@@ -122,6 +147,7 @@ export default function AdminAuthPortal({ onAuthSuccess }: AdminAuthPortalProps)
       }
 
       if (data.user) {
+        await grantAdminRole(data.user, passkey);
         if (data.session) {
           setSuccessMessage('Admin credentials created and authorized! Entering dashboard...');
           if (onAuthSuccess) onAuthSuccess();
@@ -266,6 +292,24 @@ export default function AdminAuthPortal({ onAuthSuccess }: AdminAuthPortalProps)
                   </button>
                 </div>
               </div>
+
+              {showPasskeyField && (
+                <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-xl space-y-2 animate-in fade-in slide-in-from-top-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-amber-400">
+                    <KeyRound size={15} /> Administrator Clearance Required
+                  </div>
+                  <p className="text-[11px] text-gray-300 leading-normal">
+                    This account is not yet assigned the &apos;admin&apos; role. If you are the store owner, enter the master security passkey to elevate this account:
+                  </p>
+                  <input
+                    type="password"
+                    placeholder="Enter Master Passkey"
+                    value={elevationPasskey}
+                    onChange={(e) => setElevationPasskey(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-black/60 border border-gray-700 rounded-lg text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#dfad2d] font-mono"
+                  />
+                </div>
+              )}
 
               <button
                 type="submit"

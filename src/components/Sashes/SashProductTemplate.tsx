@@ -26,7 +26,6 @@ import {
   ProductColor
 } from '@/data/sashesData';
 import EnquiryModal from '@/components/Sashes/EnquiryModal';
-import AdminConfigDrawer from '@/components/Sashes/AdminConfigDrawer';
 import Customizer from '@/components/Customizer/Customizer';
 import {
   applyOverrideToProduct,
@@ -844,13 +843,6 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
         totalPrice={totalDiscountedPrice}
         discountSaved={totalSaved}
         initialNotes={customizerNotes}
-      />
-
-      {/* ADMIN CONTROLS SIMULATOR DRAWER */}
-      <AdminConfigDrawer
-        config={product}
-        onChange={(updated) => setProduct(updated)}
-        onReset={() => setProduct(initialProduct)}
       />
     </div>
   );
