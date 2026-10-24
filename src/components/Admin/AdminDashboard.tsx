@@ -47,7 +47,8 @@ import {
   CheckCheck,
   Terminal,
   TableProperties,
-  Loader2
+  Loader2,
+  MapPin
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -114,6 +115,7 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
           customer_name: d.customer_name || 'Client',
           phone: d.phone || '',
           email: d.email || '',
+          address: d.address || '',
           organization: d.organization || '',
           event_date: d.event_date || '',
           notes: d.notes || '',
@@ -144,6 +146,7 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
               customer_name: item.customer_name || item.fullName || 'Valued Customer',
               phone: item.phone || '',
               email: item.email || '',
+              address: item.address || '',
               organization: item.organization || '',
               event_date: item.event_date || item.eventDate || '',
               notes: item.notes || item.customNotes || '',
@@ -172,6 +175,7 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
           customer_name: 'Dr. Rajesh Vardhan',
           phone: '+91 98112 34567',
           email: 'convocation@delhiuniversity.ac.in',
+          address: 'Faculty of Law, Chhatra Marg, University of Delhi, North Campus, Delhi - 110007',
           organization: 'Delhi University - Faculty of Law',
           event_date: '2026-11-20',
           notes: 'Gold zari embroidery "VALEDICTORIAN 2026" with university emblem on right side.',
@@ -190,6 +194,7 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
           customer_name: 'Ananya Deshmukh',
           phone: '+91 99201 88472',
           email: 'pageant.director@mumbaievents.org',
+          address: 'B-402, High Street Phoenix, Senapati Bapat Marg, Lower Parel, Mumbai - 400013',
           organization: 'Miss Elegance India 2026',
           event_date: '2026-12-05',
           notes: 'Include gold bullion corner tassels. High-contrast raised 3D gold stitch.',
@@ -208,6 +213,7 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
           customer_name: 'Prof. Arvind K.',
           phone: '+91 94432 10982',
           email: 'dean.academic@iitdelhi.edu',
+          address: 'Department of Design, IIT Delhi Campus, Hauz Khas, New Delhi - 110016',
           organization: 'IIT Delhi Postgraduate Milestones',
           event_date: '2026-11-28',
           notes: 'Two-tone contrast border without lace. Clean chevron V-neck.',
@@ -263,6 +269,7 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
               customer_name: d.customer_name || 'New Client',
               phone: d.phone || '',
               email: d.email || '',
+              address: d.address || '',
               organization: d.organization || '',
               event_date: d.event_date || '',
               notes: d.notes || '',
@@ -307,6 +314,7 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
         customer_name: enq.customer_name || enq.fullName || 'New Client',
         phone: enq.phone || '',
         email: enq.email || '',
+        address: enq.address || '',
         organization: enq.organization || '',
         event_date: enq.event_date || enq.eventDate || '',
         notes: enq.notes || enq.customNotes || '',
@@ -531,6 +539,7 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
       item.reference_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.phone.includes(searchQuery) ||
       item.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.address && item.address.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (item.organization && item.organization.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
@@ -883,6 +892,12 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
                           <td className="py-3 px-4">
                             <div className="font-semibold text-white">{enq.customer_name}</div>
                             <div className="text-[10px] text-gray-400">{enq.phone}</div>
+                            {enq.address && (
+                              <div className="text-[10px] text-amber-300/80 flex items-center gap-1 mt-0.5 max-w-[180px] truncate" title={enq.address}>
+                                <MapPin size={10} className="shrink-0 text-[#dfad2d]" />
+                                <span className="truncate">{enq.address}</span>
+                              </div>
+                            )}
                           </td>
                           <td className="py-3 px-4">
                             <div className="text-gray-200">{enq.product_name}</div>
@@ -1018,6 +1033,12 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
                             <td className="py-3.5 px-4">
                               <div className="font-bold text-white text-xs">{enq.customer_name}</div>
                               <div className="text-[11px] text-gray-400">{enq.phone}</div>
+                              {enq.address && (
+                                <div className="text-[10px] text-amber-300/80 flex items-center gap-1 mt-0.5 max-w-[200px] truncate" title={enq.address}>
+                                  <MapPin size={10} className="shrink-0 text-[#dfad2d]" />
+                                  <span className="truncate">{enq.address}</span>
+                                </div>
+                              )}
                               {enq.organization && (
                                 <div className="text-[10px] text-gray-500 italic mt-0.5">{enq.organization}</div>
                               )}
@@ -1150,6 +1171,29 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
                         </div>
                       </div>
                     </div>
+
+                    {selectedEnquiry.address && (
+                      <div className="p-3.5 rounded-xl bg-[#dfad2d]/5 border border-[#dfad2d]/30 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-[#dfad2d] uppercase tracking-wider flex items-center gap-1.5">
+                            <MapPin size={14} className="text-[#dfad2d]" /> Delivery / Shipping Address
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(selectedEnquiry.address || '');
+                              showToast('Delivery address copied to clipboard!');
+                            }}
+                            className="text-[11px] text-gray-400 hover:text-white underline cursor-pointer"
+                          >
+                            Copy Address
+                          </button>
+                        </div>
+                        <p className="text-xs text-white font-medium whitespace-pre-wrap leading-relaxed">
+                          {selectedEnquiry.address}
+                        </p>
+                      </div>
+                    )}
 
                     {selectedEnquiry.notes && (
                       <div className="p-4 rounded-xl bg-black/50 border border-gray-800 space-y-1">
@@ -1624,12 +1668,16 @@ CREATE TABLE IF NOT EXISTS public.enquiries (
     customer_name TEXT NOT NULL,
     phone TEXT NOT NULL,
     email TEXT NOT NULL,
+    address TEXT,
     organization TEXT,
     event_date TEXT,
     notes TEXT,
     status TEXT DEFAULT 'pending' NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Ensure address column exists if table was already created
+ALTER TABLE public.enquiries ADD COLUMN IF NOT EXISTS address TEXT;
 
 -- 3. Enable Row Level Security (RLS)
 ALTER TABLE public.sash_products ENABLE ROW LEVEL SECURITY;

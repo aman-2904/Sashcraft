@@ -1,25 +1,82 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Search, Heart, ShoppingBag, Send, ChevronDown, ChevronRight, Ribbon, Menu, X } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Search, Heart, User, Send, ChevronDown, ChevronRight, Ribbon, Menu, X, LogOut, Package, Sparkles } from 'lucide-react';
+import { supabase } from '@/utils/supabase/client';
+import { getUserProfile, UserProfile } from '@/utils/userProfile';
+import { getWishlist, WISHLIST_UPDATED_EVENT } from '@/utils/wishlist';
+import UserAuthModal from '@/components/Auth/UserAuthModal';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileCategoriesOpen, setIsMobileCategoriesOpen] = useState(false);
   const [isMobileSashesOpen, setIsMobileSashesOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [wishlistCount, setWishlistCount] = useState<number>(0);
 
   const pathname = usePathname();
+  const router = useRouter();
   const isHome = pathname === '/';
   const isCategory = pathname.startsWith('/sashes') || pathname.startsWith('/categories');
+
+  useEffect(() => {
+    // 1. Initial Wishlist count and listener
+    setWishlistCount(getWishlist().length);
+    const handleWishlistChange = () => {
+      setWishlistCount(getWishlist().length);
+    };
+    window.addEventListener(WISHLIST_UPDATED_EVENT, handleWishlistChange);
+
+    // 2. Auth state monitoring
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        setCurrentUser(session.user);
+        const p = await getUserProfile(session.user.id, session.user.email);
+        setUserProfile(p);
+      } else {
+        setCurrentUser(null);
+        setUserProfile(null);
+      }
+    });
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        setCurrentUser(session.user);
+        const p = await getUserProfile(session.user.id, session.user.email);
+        setUserProfile(p);
+      } else {
+        setCurrentUser(null);
+        setUserProfile(null);
+      }
+    });
+
+    return () => {
+      window.removeEventListener(WISHLIST_UPDATED_EVENT, handleWishlistChange);
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem('sashcraft_user_profile');
+    setCurrentUser(null);
+    setUserProfile(null);
+    setIsUserDropdownOpen(false);
+    router.push('/');
+  };
 
   if (pathname?.startsWith('/admin')) {
     return null;
   }
 
   return (
-    <div className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-[1400px] z-50">
+    <>
+      <div className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-[1400px] z-50">
       <nav className="flex items-center justify-between px-6 lg:px-8 py-3 bg-white/70 backdrop-blur-md border border-black rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.08)]">
         {/* Logo Section */}
         <Link href="/" className="flex items-center gap-3 lg:gap-4 shrink-0 hover:opacity-95 transition-opacity">
@@ -134,21 +191,102 @@ export default function Navbar() {
         {/* Actions (Desktop Only) */}
         <div className="hidden lg:flex items-center gap-6">
           <div className="flex items-center gap-5 mr-4">
-            <button className="relative flex items-center justify-center text-gray-800 cursor-pointer bg-transparent border-none transition-transform duration-200 hover:-translate-y-0.5 hover:text-[#b8860b]">
+            <button 
+              onClick={() => router.push('/sashes/satinsashes')}
+              className="relative flex items-center justify-center text-gray-800 cursor-pointer bg-transparent border-none transition-transform duration-200 hover:-translate-y-0.5 hover:text-[#b8860b]"
+              title="Search Catalog"
+            >
               <Search size={22} strokeWidth={2} />
             </button>
-            <button className="relative flex items-center justify-center text-gray-800 cursor-pointer bg-transparent border-none transition-transform duration-200 hover:-translate-y-0.5 hover:text-[#b8860b]">
+
+            {/* Wishlist Link & Counter */}
+            <Link 
+              href="/account?tab=wishlist"
+              className="relative flex items-center justify-center text-gray-800 cursor-pointer bg-transparent border-none transition-transform duration-200 hover:-translate-y-0.5 hover:text-[#b8860b]"
+              title="What I Liked (Saved Sashes)"
+            >
               <Heart size={22} strokeWidth={2} />
-              <span className="absolute -top-1.5 -right-2 bg-[#dfad2d] text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center shadow-sm">2</span>
-            </button>
-            <button className="relative flex items-center justify-center text-gray-800 cursor-pointer bg-transparent border-none transition-transform duration-200 hover:-translate-y-0.5 hover:text-[#b8860b]">
-              <ShoppingBag size={22} strokeWidth={2} />
-              <span className="absolute -top-1.5 -right-2 bg-[#dfad2d] text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center shadow-sm">0</span>
-            </button>
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1.5 -right-2 bg-[#dfad2d] text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center shadow-sm">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+
+            {/* User Profile / Auth Button */}
+            {currentUser ? (
+              <div className="relative">
+                <button
+                  onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                  className="relative flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-[#dfad2d] to-[#a87e14] text-white font-bold text-xs shadow-md border-2 border-white cursor-pointer hover:scale-105 transition-all"
+                  title="My Account"
+                >
+                  {userProfile?.fullName?.[0]?.toUpperCase() || currentUser.email?.[0]?.toUpperCase() || 'U'}
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 rounded-full border border-white" />
+                </button>
+
+                {/* Dropdown Menu */}
+                {isUserDropdownOpen && (
+                  <div 
+                    className="absolute right-0 top-full mt-3 w-64 bg-white border border-gray-100 rounded-2xl shadow-2xl p-2.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+                  >
+                    <div className="px-3 py-2 border-b border-gray-100 mb-1">
+                      <div className="font-bold text-gray-900 text-xs truncate">
+                        {userProfile?.fullName || 'SashCraft Customer'}
+                      </div>
+                      <div className="text-[11px] text-gray-500 truncate">{currentUser.email}</div>
+                    </div>
+
+                    <Link
+                      href="/account"
+                      onClick={() => setIsUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] transition-colors"
+                    >
+                      <User size={15} /> My Profile & Address
+                    </Link>
+                    <Link
+                      href="/account?tab=orders"
+                      onClick={() => setIsUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] transition-colors"
+                    >
+                      <Package size={15} /> Order & Enquiry Status
+                    </Link>
+                    <Link
+                      href="/account?tab=wishlist"
+                      onClick={() => setIsUserDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] transition-colors"
+                    >
+                      <Heart size={15} /> What I Liked ({wishlistCount})
+                    </Link>
+
+                    <div className="border-t border-gray-100 mt-1 pt-1">
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut size={15} /> Sign Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className="relative flex items-center justify-center text-gray-800 cursor-pointer bg-transparent border-none transition-transform duration-200 hover:-translate-y-0.5 hover:text-[#b8860b]"
+                title="Sign In / Register"
+              >
+                <User size={22} strokeWidth={2} />
+              </button>
+            )}
           </div>
-          <button className="bg-gradient-to-br from-[#dfad2d] to-[#a87e14] text-white border-none px-6 py-3 rounded-full text-sm font-bold tracking-wide cursor-pointer flex items-center gap-2.5 transition-all duration-300 shadow-[0_4px_15px_rgba(223,173,45,0.4)] hover:-translate-y-0.5 hover:scale-105 hover:shadow-[0_6px_20px_rgba(223,173,45,0.6)]">
+
+          <Link
+            href="/sashes/satinsashes"
+            className="bg-gradient-to-br from-[#dfad2d] to-[#a87e14] text-white border-none px-6 py-3 rounded-full text-sm font-bold tracking-wide cursor-pointer flex items-center gap-2.5 transition-all duration-300 shadow-[0_4px_15px_rgba(223,173,45,0.4)] hover:-translate-y-0.5 hover:scale-105 hover:shadow-[0_6px_20px_rgba(223,173,45,0.6)]"
+          >
             <Send size={16} strokeWidth={2.5} /> GET CUSTOM QUOTE
-          </button>
+          </Link>
         </div>
 
         {/* Mobile Menu Button */}
@@ -258,27 +396,76 @@ export default function Navbar() {
           </ul>
 
           <div className="flex items-center justify-around py-2 border-b border-gray-100 pb-6">
-            <button className="flex flex-col items-center gap-1 text-gray-600 hover:text-[#b8860b]">
+            <button 
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                router.push('/sashes/satinsashes');
+              }}
+              className="flex flex-col items-center gap-1 text-gray-600 hover:text-[#b8860b]"
+            >
               <Search size={24} />
               <span className="text-[10px] font-bold uppercase tracking-wider">Search</span>
             </button>
-            <button className="flex flex-col items-center gap-1 text-gray-600 hover:text-[#b8860b] relative">
+            <Link
+              href="/account?tab=wishlist"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex flex-col items-center gap-1 text-gray-600 hover:text-[#b8860b] relative"
+            >
               <Heart size={24} />
-              <span className="absolute -top-1 -right-2 bg-[#dfad2d] text-white text-[10px] font-bold min-w-[16px] h-[16px] rounded-full flex items-center justify-center">2</span>
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-2 bg-[#dfad2d] text-white text-[10px] font-bold min-w-[16px] h-[16px] rounded-full flex items-center justify-center">
+                  {wishlistCount}
+                </span>
+              )}
               <span className="text-[10px] font-bold uppercase tracking-wider mt-1">Wishlist</span>
-            </button>
-            <button className="flex flex-col items-center gap-1 text-gray-600 hover:text-[#b8860b] relative">
-              <ShoppingBag size={24} />
-              <span className="absolute -top-1 -right-2 bg-[#dfad2d] text-white text-[10px] font-bold min-w-[16px] h-[16px] rounded-full flex items-center justify-center">0</span>
-              <span className="text-[10px] font-bold uppercase tracking-wider mt-1">Cart</span>
-            </button>
+            </Link>
+
+            {currentUser ? (
+              <Link
+                href="/account"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex flex-col items-center gap-1 text-[#b8860b]"
+              >
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#dfad2d] to-[#a87e14] text-white text-xs font-bold flex items-center justify-center shadow-sm">
+                  {userProfile?.fullName?.[0]?.toUpperCase() || currentUser.email?.[0]?.toUpperCase() || 'U'}
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider mt-1">Profile</span>
+              </Link>
+            ) : (
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsAuthModalOpen(true);
+                }}
+                className="flex flex-col items-center gap-1 text-gray-600 hover:text-[#b8860b]"
+              >
+                <User size={24} />
+                <span className="text-[10px] font-bold uppercase tracking-wider mt-1">Sign In</span>
+              </button>
+            )}
           </div>
 
-          <button className="w-full bg-gradient-to-br from-[#dfad2d] to-[#a87e14] text-white py-4 rounded-xl text-[13px] font-bold tracking-widest flex items-center justify-center gap-2 shadow-lg mb-8">
+          <Link
+            href="/sashes/satinsashes"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="w-full bg-gradient-to-br from-[#dfad2d] to-[#a87e14] text-white py-4 rounded-xl text-[13px] font-bold tracking-widest flex items-center justify-center gap-2 shadow-lg mb-8"
+          >
             <Send size={18} strokeWidth={2.5} /> GET CUSTOM QUOTE
-          </button>
+          </Link>
         </div>
       )}
-    </div>
+      </div>
+
+      {/* Customer Authentication Modal (Rendered outside transformed container) */}
+      <UserAuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={async () => {
+          setIsAuthModalOpen(false);
+          const p = await getUserProfile();
+          setUserProfile(p);
+        }}
+      />
+    </>
   );
 }

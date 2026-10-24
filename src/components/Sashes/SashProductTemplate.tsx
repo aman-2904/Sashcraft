@@ -34,6 +34,11 @@ import {
   getLocalStoredOverrides,
   subscribeToProductPricing,
 } from '@/utils/productPricing';
+import {
+  isWishlisted as checkWishlisted,
+  toggleWishlist,
+  WISHLIST_UPDATED_EVENT,
+} from '@/utils/wishlist';
 
 interface SashProductTemplateProps {
   initialProduct: SashProductConfig;
@@ -76,8 +81,16 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
       setProduct((prev) => applyOverrideToProduct(prev, latestOverride));
     });
 
+    // 4. Wishlist state sync
+    setIsWishlisted(checkWishlisted(initialProduct.slug));
+    const handleWishlistChange = () => {
+      setIsWishlisted(checkWishlisted(initialProduct.slug));
+    };
+    window.addEventListener(WISHLIST_UPDATED_EVENT, handleWishlistChange);
+
     return () => {
       unsubscribe();
+      window.removeEventListener(WISHLIST_UPDATED_EVENT, handleWishlistChange);
     };
   }, [initialProduct.slug]);
 
@@ -239,15 +252,18 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
               <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setIsWishlisted(!isWishlisted)}
+                  onClick={() => {
+                    const isAdded = toggleWishlist(product.slug);
+                    setIsWishlisted(isAdded);
+                  }}
                   className={`w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center transition-all ${
                     isWishlisted
                       ? 'bg-rose-50 text-rose-500 border border-rose-200'
                       : 'bg-white/80 hover:bg-white text-gray-700 border border-gray-200 shadow-sm'
                   }`}
-                  title="Add to wishlist"
+                  title={isWishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
                 >
-                  <Heart size={16} className={isWishlisted ? 'fill-rose-500' : ''} />
+                  <Heart size={16} className={isWishlisted ? 'fill-rose-500 text-rose-500' : ''} />
                 </button>
                 <button
                   type="button"

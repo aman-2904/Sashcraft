@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
-import { X, Send, MessageCircle, CheckCircle2, ShieldCheck, Calendar, Building, Phone, Mail, User, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { X, Send, MessageCircle, CheckCircle2, ShieldCheck, Calendar, Building, Phone, Mail, User, Sparkles, MapPin } from 'lucide-react';
 import { SatinSashProductConfig, VariantDetails, ProductColor } from '@/data/satinSashData';
 import { supabase } from '@/utils/supabase/client';
+import { getCachedUserProfile, getUserProfile } from '@/utils/userProfile';
 
 interface EnquiryModalProps {
   isOpen: boolean;
@@ -30,14 +32,57 @@ export default function EnquiryModal({
   discountSaved,
   initialNotes = '',
 }: EnquiryModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
     email: '',
+    address: '',
     organization: '',
     eventDate: '',
     customNotes: initialNotes || '',
   });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  React.useEffect(() => {
+    // Auto-fill from authenticated user profile if available
+    const cached = getCachedUserProfile();
+    if (cached) {
+      setFormData((prev) => ({
+        ...prev,
+        fullName: prev.fullName || cached.fullName || '',
+        phone: prev.phone || cached.phone || '',
+        email: prev.email || cached.email || '',
+        address: prev.address || cached.address || '',
+      }));
+    }
+
+    getUserProfile().then((profile) => {
+      if (profile && (profile.fullName || profile.email)) {
+        setFormData((prev) => ({
+          ...prev,
+          fullName: prev.fullName || profile.fullName || '',
+          phone: prev.phone || profile.phone || '',
+          email: prev.email || profile.email || '',
+          address: prev.address || profile.address || '',
+        }));
+      }
+    });
+  }, [isOpen]);
 
   React.useEffect(() => {
     if (initialNotes) {
@@ -49,7 +94,7 @@ export default function EnquiryModal({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [enquiryRef, setEnquiryRef] = useState('');
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -75,6 +120,7 @@ export default function EnquiryModal({
       customer_name: formData.fullName.trim(),
       phone: formData.phone.trim(),
       email: formData.email.trim(),
+      address: formData.address.trim() || null,
       organization: formData.organization.trim() || null,
       event_date: formData.eventDate || null,
       notes: formData.customNotes.trim() || null,
@@ -109,6 +155,7 @@ export default function EnquiryModal({
         unitPrice: Number(unitPrice) || 0,
         totalPrice: Number(totalPrice) || 0,
         fullName: formData.fullName.trim(),
+        address: formData.address.trim(),
         customNotes: formData.customNotes.trim(),
         eventDate: formData.eventDate,
       };
@@ -147,6 +194,7 @@ export default function EnquiryModal({
       `*Unit Price:* ${product.currency.symbol}${unitPrice}%0A` +
       `*Total Estimate:* ${product.currency.symbol}${totalPrice}%0A` +
       (formData.fullName ? `*Name:* ${formData.fullName}%0A` : '') +
+      (formData.address ? `*Delivery Address:* ${formData.address}%0A` : '') +
       (formData.organization ? `*Org / College:* ${formData.organization}%0A` : '') +
       (formData.eventDate ? `*Event Date:* ${formData.eventDate}%0A` : '') +
       (formData.customNotes ? `*Custom Notes:* ${formData.customNotes}%0A` : '') +
@@ -156,14 +204,14 @@ export default function EnquiryModal({
     window.open(whatsappUrl, '_blank');
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/75 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200" onClick={onClose}>
       <div 
-        className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col max-h-[92vh]"
+        className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col my-auto max-h-[90vh] animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#1a1a1a] via-[#2a2418] to-[#1a1a1a] px-6 py-5 text-white flex items-center justify-between relative overflow-hidden">
+        <div className="bg-gradient-to-r from-[#1a1a1a] via-[#2a2418] to-[#1a1a1a] px-6 py-5 text-white flex items-center justify-between relative overflow-hidden shrink-0">
           <div className="absolute top-0 right-0 w-48 h-48 bg-[#b8860b]/20 rounded-full blur-2xl pointer-events-none" />
           
           <div className="flex items-center gap-3 relative z-10">
@@ -350,6 +398,28 @@ export default function EnquiryModal({
               </div>
 
               <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-gray-900 font-bold">
+                    <MapPin size={14} className="text-[#dfad2d]" /> Delivery / Shipping Address *
+                  </span>
+                  <span className="text-[11px] font-normal text-gray-500 lowercase">
+                    for verified courier dispatch
+                  </span>
+                </label>
+                <div className="relative">
+                  <textarea
+                    name="address"
+                    required
+                    rows={2}
+                    placeholder="Complete address with City, State & Pincode (e.g. 104 Grand Avenue, Civil Lines, New Delhi - 110054)"
+                    value={formData.address}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#dfad2d] focus:bg-white transition-all text-gray-900 resize-none"
+                  />
+                </div>
+              </div>
+
+              <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
                   Target Event / Convocation Date (Optional)
                 </label>
@@ -407,6 +477,7 @@ export default function EnquiryModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

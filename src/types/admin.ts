@@ -20,6 +20,7 @@ export interface CustomerEnquiry {
   customer_name: string;
   phone: string;
   email: string;
+  address?: string;
   organization?: string;
   event_date?: string;
   notes?: string;

@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS public.sash_products (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 2. Create enquiries table (Customer quote requests & custom orders)
+-- 2. Create enquiries table (Customer quote requests, orders & shipping address)
 CREATE TABLE IF NOT EXISTS public.enquiries (
     id BIGSERIAL PRIMARY KEY,
     reference_id TEXT NOT NULL,
@@ -35,16 +35,32 @@ CREATE TABLE IF NOT EXISTS public.enquiries (
     email TEXT NOT NULL,
     organization TEXT,
     event_date TEXT,
+    address TEXT,
     notes TEXT,
     status TEXT DEFAULT 'pending' NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 3. Enable Row Level Security (RLS) on both tables
+-- Ensure address column exists if table was previously created
+ALTER TABLE public.enquiries ADD COLUMN IF NOT EXISTS address TEXT;
+
+-- 3. Create user_profiles table (Customer profile, phone, delivery address)
+CREATE TABLE IF NOT EXISTS public.user_profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    email TEXT NOT NULL,
+    full_name TEXT,
+    phone TEXT,
+    address TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- 4. Enable Row Level Security (RLS) on all tables
 ALTER TABLE public.sash_products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.enquiries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_profiles ENABLE ROW LEVEL SECURITY;
 
--- 4. RLS Policies for sash_products:
+-- 5. RLS Policies for sash_products:
 -- Allow anyone (public storefront) to read live products and pricing
 DROP POLICY IF EXISTS "Public Read Access on sash_products" ON public.sash_products;
 CREATE POLICY "Public Read Access on sash_products"
@@ -52,7 +68,7 @@ CREATE POLICY "Public Read Access on sash_products"
     FOR SELECT
     USING (true);
 
--- Allow inserting and updating products (authenticated admin or service)
+-- Allow inserting and updating products (admin management)
 DROP POLICY IF EXISTS "Allow All Updates on sash_products" ON public.sash_products;
 CREATE POLICY "Allow All Updates on sash_products"
     ON public.sash_products
@@ -60,8 +76,8 @@ CREATE POLICY "Allow All Updates on sash_products"
     USING (true)
     WITH CHECK (true);
 
--- 5. RLS Policies for enquiries:
--- Allow customers to insert enquiries from the public storefront
+-- 6. RLS Policies for enquiries:
+-- Allow customers to submit enquiries from the public storefront
 DROP POLICY IF EXISTS "Public Insert on enquiries" ON public.enquiries;
 CREATE POLICY "Public Insert on enquiries"
     ON public.enquiries
@@ -76,8 +92,15 @@ CREATE POLICY "Allow All Access on enquiries"
     USING (true)
     WITH CHECK (true);
 
--- 6. Enable Realtime Replication for instant live updates on the website
--- Note: If these tables are already in the publication, Supabase will safely skip.
+-- 7. RLS Policies for user_profiles:
+DROP POLICY IF EXISTS "Allow user to manage own profile" ON public.user_profiles;
+CREATE POLICY "Allow user to manage own profile"
+    ON public.user_profiles
+    FOR ALL
+    USING (true)
+    WITH CHECK (true);
+
+-- 8. Enable Realtime Replication for instant live updates
 DO $$
 BEGIN
     IF NOT EXISTS (
@@ -93,9 +116,16 @@ BEGIN
     ) THEN
         ALTER PUBLICATION supabase_realtime ADD TABLE public.enquiries;
     END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_publication_tables 
+        WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'user_profiles'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.user_profiles;
+    END IF;
 END $$;
 
--- 7. Seed Initial Catalog Data (with updated pricing for all 4 sash lines)
+-- 9. Seed Initial Catalog Data (with updated pricing for all 4 sash lines)
 INSERT INTO public.sash_products (
     id, slug, title, category, tagline, in_stock, 
     without_lace_actual, without_lace_discounted, 
