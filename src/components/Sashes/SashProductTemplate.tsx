@@ -114,12 +114,22 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
     }
   }, [product.title]);
 
+  // Automatically sync activeImage when product images are updated dynamically from the database
+  useEffect(() => {
+    const variantImgs = product.variants[selectedVariantKey]?.images || [];
+    if (variantImgs.length > 0 && !variantImgs.includes(activeImage)) {
+      setActiveImage(variantImgs[0]);
+    }
+  }, [product, selectedVariantKey, activeImage]);
+
   const currentVariant: VariantDetails = product.variants[selectedVariantKey];
 
   // Whenever variant changes, default the active image to that variant's primary image
   const handleVariantSelect = (key: 'withoutLace' | 'withLace') => {
     setSelectedVariantKey(key);
-    setActiveImage(product.variants[key].images[0]);
+    if (product.variants[key]?.images?.length > 0) {
+      setActiveImage(product.variants[key].images[0]);
+    }
   };
 
   const handleSelectColor = (color: ProductColor) => {
@@ -262,6 +272,7 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
                       src={imgSrc}
                       alt={`${product.title} preview angle ${idx + 1}`}
                       fill
+                      unoptimized
                       sizes="80px"
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -325,6 +336,7 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
                   alt={product.title}
                   fill
                   priority
+                  unoptimized
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-contain p-2 group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
@@ -965,6 +977,7 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
                     src={product.variants.withLace.images[0] || activeImage}
                     alt={`${product.title} craft detail`}
                     fill
+                    unoptimized
                     className="object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-4">
@@ -1026,6 +1039,7 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
               src={activeImage}
               alt="Zoomed view"
               fill
+              unoptimized
               className="object-contain"
             />
             <button

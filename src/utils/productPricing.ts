@@ -10,6 +10,40 @@ const LOCAL_STORAGE_KEY = 'sashcraft_product_overrides';
  * Format raw database row into an AdminProductOverride
  */
 export function mapRowToOverride(row: any): AdminProductOverride {
+  let parsedImages: string[] | undefined = undefined;
+  if (Array.isArray(row.images)) {
+    parsedImages = row.images;
+  } else if (typeof row.images === 'string') {
+    try {
+      const p = JSON.parse(row.images);
+      if (Array.isArray(p)) parsedImages = p;
+    } catch {
+      if (row.images.startsWith('http') || row.images.startsWith('/') || row.images.startsWith('data:')) {
+        parsedImages = [row.images];
+      }
+    }
+  }
+
+  let withLaceImgs: string[] | undefined = undefined;
+  if (Array.isArray(row.with_lace_images)) {
+    withLaceImgs = row.with_lace_images;
+  } else if (typeof row.with_lace_images === 'string') {
+    try {
+      const p = JSON.parse(row.with_lace_images);
+      if (Array.isArray(p)) withLaceImgs = p;
+    } catch {}
+  }
+
+  let withoutLaceImgs: string[] | undefined = undefined;
+  if (Array.isArray(row.without_lace_images)) {
+    withoutLaceImgs = row.without_lace_images;
+  } else if (typeof row.without_lace_images === 'string') {
+    try {
+      const p = JSON.parse(row.without_lace_images);
+      if (Array.isArray(p)) withoutLaceImgs = p;
+    } catch {}
+  }
+
   return {
     id: row.id || row.slug,
     slug: row.slug,
@@ -19,6 +53,9 @@ export function mapRowToOverride(row: any): AdminProductOverride {
     withoutLaceDiscounted: Number(row.without_lace_discounted) || 0,
     withLaceActual: Number(row.with_lace_actual) || 0,
     withLaceDiscounted: Number(row.with_lace_discounted) || 0,
+    images: parsedImages,
+    withLaceImages: withLaceImgs,
+    withoutLaceImages: withoutLaceImgs,
     lastUpdated: row.updated_at || new Date().toISOString(),
   };
 }
@@ -46,6 +83,21 @@ export function applyOverrideToProduct(
 ): SashProductConfig {
   if (!override) return product;
 
+  // Determine dynamic images from database override if present
+  const withLaceImages =
+    override.withLaceImages && override.withLaceImages.length > 0
+      ? override.withLaceImages
+      : override.images && override.images.length > 0
+      ? override.images
+      : product.variants.withLace.images;
+
+  const withoutLaceImages =
+    override.withoutLaceImages && override.withoutLaceImages.length > 0
+      ? override.withoutLaceImages
+      : override.images && override.images.length > 0
+      ? override.images
+      : product.variants.withoutLace.images;
+
   return {
     ...product,
     title: override.title && override.title.trim().length > 0 ? override.title.trim() : product.title,
@@ -54,6 +106,7 @@ export function applyOverrideToProduct(
       ...product.variants,
       withoutLace: {
         ...product.variants.withoutLace,
+        images: withoutLaceImages,
         actualPrice:
           override.withoutLaceActual !== undefined && override.withoutLaceActual > 0
             ? override.withoutLaceActual
@@ -65,6 +118,7 @@ export function applyOverrideToProduct(
       },
       withLace: {
         ...product.variants.withLace,
+        images: withLaceImages,
         actualPrice:
           override.withLaceActual !== undefined && override.withLaceActual > 0
             ? override.withLaceActual
@@ -187,6 +241,16 @@ export async function saveProductOverride(
       with_lace_discounted: override.withLaceDiscounted,
       updated_at: new Date().toISOString(),
     };
+
+    if (override.images !== undefined) {
+      updateFields.images = override.images;
+    }
+    if (override.withLaceImages !== undefined) {
+      updateFields.with_lace_images = override.withLaceImages;
+    }
+    if (override.withoutLaceImages !== undefined) {
+      updateFields.without_lace_images = override.withoutLaceImages;
+    }
 
     // First attempt direct update by slug (guarantees seamless update on existing records across all browsers)
     const { data: updatedRows, error: updateError } = await supabase

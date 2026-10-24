@@ -49,7 +49,11 @@ import {
   Terminal,
   TableProperties,
   Loader2,
-  MapPin
+  MapPin,
+  Upload,
+  Image as ImageIcon,
+  Star,
+  X
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -465,6 +469,132 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
     );
   };
 
+  // Dynamic Image Management States
+  const [activeImageVariantTabs, setActiveImageVariantTabs] = useState<Record<string, 'withLace' | 'withoutLace'>>({});
+  const [newImageUrls, setNewImageUrls] = useState<Record<string, string>>({});
+  const [isUploadingImage, setIsUploadingImage] = useState<Record<string, boolean>>({});
+
+  const compressImageFile = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = document.createElement('img');
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1600;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height = Math.round((height * MAX_WIDTH) / width);
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width = Math.round((width * MAX_HEIGHT) / height);
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            resolve(dataUrl);
+          } else {
+            resolve(event.target?.result as string);
+          }
+        };
+        img.onerror = (e) => reject(e);
+      };
+      reader.onerror = (e) => reject(e);
+    });
+  };
+
+  const handleAddImage = (slug: string, variantKey: 'withLace' | 'withoutLace', url: string) => {
+    const cleanUrl = url.trim();
+    if (!cleanUrl) return;
+    setProductsList((prev) =>
+      prev.map((prod) => {
+        if (prod.slug !== slug) return prod;
+        const currentImages = prod.variants[variantKey].images || [];
+        return {
+          ...prod,
+          variants: {
+            ...prod.variants,
+            [variantKey]: {
+              ...prod.variants[variantKey],
+              images: [...currentImages, cleanUrl],
+            },
+          },
+        };
+      })
+    );
+    setNewImageUrls((prev) => ({ ...prev, [`${slug}_${variantKey}`]: '' }));
+  };
+
+  const handleRemoveImage = (slug: string, variantKey: 'withLace' | 'withoutLace', indexToRemove: number) => {
+    setProductsList((prev) =>
+      prev.map((prod) => {
+        if (prod.slug !== slug) return prod;
+        const updatedImages = prod.variants[variantKey].images.filter((_, idx) => idx !== indexToRemove);
+        return {
+          ...prod,
+          variants: {
+            ...prod.variants,
+            [variantKey]: {
+              ...prod.variants[variantKey],
+              images: updatedImages,
+            },
+          },
+        };
+      })
+    );
+  };
+
+  const handleSetPrimaryImage = (slug: string, variantKey: 'withLace' | 'withoutLace', indexToPrimary: number) => {
+    setProductsList((prev) =>
+      prev.map((prod) => {
+        if (prod.slug !== slug) return prod;
+        const images = [...prod.variants[variantKey].images];
+        if (indexToPrimary >= 0 && indexToPrimary < images.length) {
+          const [primary] = images.splice(indexToPrimary, 1);
+          images.unshift(primary);
+        }
+        return {
+          ...prod,
+          variants: {
+            ...prod.variants,
+            [variantKey]: {
+              ...prod.variants[variantKey],
+              images,
+            },
+          },
+        };
+      })
+    );
+  };
+
+  const handleImageUpload = async (slug: string, variantKey: 'withLace' | 'withoutLace', file: File) => {
+    try {
+      setIsUploadingImage((prev) => ({ ...prev, [`${slug}_${variantKey}`]: true }));
+      const dataUrl = await compressImageFile(file);
+      handleAddImage(slug, variantKey, dataUrl);
+      setSavedProductToast(`✓ Image added to ${slug}! Click 'Save Changes' to persist to database.`);
+      setTimeout(() => setSavedProductToast(null), 4000);
+    } catch (err) {
+      console.error('Failed to read image file:', err);
+    } finally {
+      setIsUploadingImage((prev) => ({ ...prev, [`${slug}_${variantKey}`]: false }));
+    }
+  };
+
   // Save Product Overrides to Storage, Broadcast to Website, & Upsert to Supabase
   const saveAllProducts = async (targetSlug?: string) => {
     setIsSavingProduct(targetSlug || 'all');
@@ -485,6 +615,9 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
         withoutLaceDiscounted: p.variants.withoutLace.discountedPrice,
         withLaceActual: p.variants.withLace.actualPrice,
         withLaceDiscounted: p.variants.withLace.discountedPrice,
+        images: Array.from(new Set([...p.variants.withLace.images, ...p.variants.withoutLace.images])),
+        withLaceImages: p.variants.withLace.images,
+        withoutLaceImages: p.variants.withoutLace.images,
         lastUpdated: new Date().toISOString(),
       };
 
@@ -504,12 +637,12 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
       const targetProd = targets[0];
       setSavedProductToast(
         targetSlug && targetProd
-          ? `✓ Title "${targetProd.title}", pricing & stock saved to Supabase & live across all browsers!`
-          : '✓ All product titles, prices & stock saved to Supabase & live across all browsers!'
+          ? `✓ Title "${targetProd.title}", images (${targetProd.variants.withLace.images.length + targetProd.variants.withoutLace.images.length}) & pricing saved to Supabase & live across all browsers!`
+          : '✓ All product titles, images, prices & stock saved to Supabase & live across all browsers!'
       );
     } else {
       setSavedProductToast(
-        `⚠ Updated locally! To sync across all browsers, run SQL: ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS title TEXT; (${anySupabaseError || 'Check Supabase table'})`
+        `⚠ Updated locally! To sync across all browsers, run SQL: ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS images JSONB; (${anySupabaseError || 'Check Supabase table'})`
       );
     }
     setTimeout(() => setSavedProductToast(null), 5500);
@@ -1537,6 +1670,203 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
                       </div>
                     </div>
 
+                    {/* Dynamic Image Management (Stored in Database) */}
+                    <div className="p-4 rounded-2xl bg-gray-900/60 border border-gray-800 space-y-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <ImageIcon size={15} className="text-[#dfad2d]" />
+                          <span className="font-bold text-xs text-white uppercase tracking-wider">
+                            Product Images (Stored in DB)
+                          </span>
+                        </div>
+
+                        {/* Variant tabs for image management */}
+                        <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-gray-800">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setActiveImageVariantTabs((prev) => ({
+                                ...prev,
+                                [product.slug]: 'withLace',
+                              }))
+                            }
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+                              (activeImageVariantTabs[product.slug] || 'withLace') === 'withLace'
+                                ? 'bg-[#dfad2d] text-black shadow'
+                                : 'text-gray-400 hover:text-white'
+                            }`}
+                          >
+                            With Lace ({product.variants.withLace.images.length})
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setActiveImageVariantTabs((prev) => ({
+                                ...prev,
+                                [product.slug]: 'withoutLace',
+                              }))
+                            }
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+                              activeImageVariantTabs[product.slug] === 'withoutLace'
+                                ? 'bg-[#dfad2d] text-black shadow'
+                                : 'text-gray-400 hover:text-white'
+                            }`}
+                          >
+                            Without Lace ({product.variants.withoutLace.images.length})
+                          </button>
+                        </div>
+                      </div>
+
+                      {(() => {
+                        const curVariant = activeImageVariantTabs[product.slug] || 'withLace';
+                        const curImages = product.variants[curVariant].images || [];
+                        const isUploading = isUploadingImage[`${product.slug}_${curVariant}`];
+
+                        return (
+                          <div className="space-y-3">
+                            {/* Images Grid */}
+                            {curImages.length > 0 ? (
+                              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5">
+                                {curImages.map((imgUrl, imgIdx) => (
+                                  <div
+                                    key={imgIdx}
+                                    className="group relative aspect-[3/4] rounded-xl overflow-hidden border border-gray-700 bg-black/50"
+                                  >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                      src={imgUrl}
+                                      alt={`Variant image ${imgIdx + 1}`}
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    />
+
+                                    {/* Badge */}
+                                    <div className="absolute top-1 left-1">
+                                      <span
+                                        className={`text-[9px] px-1.5 py-0.5 rounded font-bold ${
+                                          imgIdx === 0
+                                            ? 'bg-amber-500 text-black shadow'
+                                            : 'bg-black/70 text-gray-300 backdrop-blur-sm'
+                                        }`}
+                                      >
+                                        {imgIdx === 0 ? 'Cover' : `#${imgIdx + 1}`}
+                                      </span>
+                                    </div>
+
+                                    {/* Hover Action Overlay */}
+                                    <div className="absolute inset-0 bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-1">
+                                      {imgIdx !== 0 && (
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            handleSetPrimaryImage(product.slug, curVariant, imgIdx)
+                                          }
+                                          className="px-2 py-1 bg-[#dfad2d] hover:bg-[#c99719] text-black text-[10px] font-bold rounded flex items-center gap-1 transition-all cursor-pointer shadow"
+                                          title="Set as primary cover image"
+                                        >
+                                          <Star size={10} className="fill-black" /> Cover
+                                        </button>
+                                      )}
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          handleRemoveImage(product.slug, curVariant, imgIdx)
+                                        }
+                                        className="px-2 py-1 bg-red-600/90 hover:bg-red-600 text-white text-[10px] font-bold rounded flex items-center gap-1 transition-all cursor-pointer shadow"
+                                        title="Delete image"
+                                      >
+                                        <Trash2 size={10} /> Delete
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="p-4 rounded-xl border border-dashed border-gray-700 text-center text-xs text-gray-500">
+                                No images uploaded for this variant yet. Upload an image file or add an image URL below.
+                              </div>
+                            )}
+
+                            {/* Upload / Add Controls */}
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
+                              {/* File Upload Button */}
+                              <label
+                                className={`px-3 py-2 bg-gradient-to-r from-[#dfad2d] to-[#c99719] hover:brightness-110 text-black font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-md transition-all shrink-0 ${
+                                  isUploading ? 'opacity-60 cursor-not-allowed' : ''
+                                }`}
+                              >
+                                {isUploading ? (
+                                  <>
+                                    <Loader2 size={14} className="animate-spin text-black" />
+                                    <span>Processing...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Upload size={14} />
+                                    <span>Upload Image</span>
+                                  </>
+                                )}
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  disabled={isUploading}
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      handleImageUpload(product.slug, curVariant, file);
+                                    }
+                                    e.target.value = '';
+                                  }}
+                                />
+                              </label>
+
+                              {/* URL Input */}
+                              <div className="flex-1 flex items-center gap-1.5 bg-gray-900 border border-gray-700 rounded-xl px-2.5 py-1">
+                                <input
+                                  type="text"
+                                  placeholder="Or paste image URL (https://... or /images/...)"
+                                  value={newImageUrls[`${product.slug}_${curVariant}`] || ''}
+                                  onChange={(e) =>
+                                    setNewImageUrls((prev) => ({
+                                      ...prev,
+                                      [`${product.slug}_${curVariant}`]: e.target.value,
+                                    }))
+                                  }
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      handleAddImage(
+                                        product.slug,
+                                        curVariant,
+                                        newImageUrls[`${product.slug}_${curVariant}`] || ''
+                                      );
+                                    }
+                                  }}
+                                  className="w-full bg-transparent text-xs text-white placeholder-gray-500 focus:outline-none"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleAddImage(
+                                      product.slug,
+                                      curVariant,
+                                      newImageUrls[`${product.slug}_${curVariant}`] || ''
+                                    )
+                                  }
+                                  className="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-[#dfad2d] font-bold text-xs rounded-lg transition-colors shrink-0 cursor-pointer"
+                                >
+                                  + Add URL
+                                </button>
+                              </div>
+                            </div>
+                            <p className="text-[10px] text-gray-500 italic">
+                              💡 Images are saved directly into your Supabase database table (<code className="text-gray-400">sash_products.images</code>). Click &ldquo;Save {product.title.split(' ')[0]}&rdquo; below to persist changes live across all browsers.
+                            </p>
+                          </div>
+                        );
+                      })()}
+                    </div>
+
                     {/* Actions */}
                     <div className="pt-2 flex items-center justify-between border-t border-gray-800">
                       <Link
@@ -1717,6 +2047,12 @@ CREATE TABLE IF NOT EXISTS public.sash_products (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Ensure title and image columns exist if table was previously created
+ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS title TEXT;
+ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS images JSONB;
+ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS with_lace_images JSONB;
+ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS without_lace_images JSONB;
+
 -- 2. Create enquiries table (Customer quote requests & custom orders)
 CREATE TABLE IF NOT EXISTS public.enquiries (
     id BIGSERIAL PRIMARY KEY,
@@ -1812,6 +2148,12 @@ CREATE TABLE IF NOT EXISTS public.sash_products (
     with_lace_discounted NUMERIC NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Ensure title and image columns exist if table was previously created
+ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS title TEXT;
+ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS images JSONB;
+ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS with_lace_images JSONB;
+ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS without_lace_images JSONB;
 
 -- 2. Create enquiries table (Customer quote requests & custom orders)
 CREATE TABLE IF NOT EXISTS public.enquiries (

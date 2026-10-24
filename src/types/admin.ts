@@ -37,5 +37,8 @@ export interface AdminProductOverride {
   withoutLaceDiscounted: number;
   withLaceActual: number;
   withLaceDiscounted: number;
+  images?: string[];
+  withLaceImages?: string[];
+  withoutLaceImages?: string[];
   lastUpdated: string;
 }
