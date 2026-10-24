@@ -28,13 +28,21 @@ import {
 import EnquiryModal from '@/components/Sashes/EnquiryModal';
 import AdminConfigDrawer from '@/components/Sashes/AdminConfigDrawer';
 import Customizer from '@/components/Customizer/Customizer';
+import {
+  applyOverrideToProduct,
+  fetchProductOverride,
+  getLocalStoredOverrides,
+  subscribeToProductPricing,
+} from '@/utils/productPricing';
 
 interface SashProductTemplateProps {
   initialProduct: SashProductConfig;
 }
 
 export default function SashProductTemplate({ initialProduct }: SashProductTemplateProps) {
+  // Initialize with initialProduct directly so SSR and client initial HTML match 100%
   const [product, setProduct] = useState<SashProductConfig>(initialProduct);
+
   const [selectedVariantKey, setSelectedVariantKey] = useState<'withoutLace' | 'withLace'>('withLace');
   const [selectedColor, setSelectedColor] = useState<ProductColor>(initialProduct.colors[0]);
   const [activeImage, setActiveImage] = useState<string>(initialProduct.variants.withLace.images[0]);
@@ -48,12 +56,30 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
   const [customizerNotes, setCustomizerNotes] = useState<string>('');
 
   // Update internal product when initialProduct changes (e.g. page navigation)
+  // and load live overrides from Supabase & cache post-hydration
   useEffect(() => {
-    setProduct(initialProduct);
-    setSelectedColor(initialProduct.colors[0]);
-    setActiveImage(initialProduct.variants.withLace.images[0]);
-    setSelectedVariantKey('withLace');
-  }, [initialProduct]);
+    // 1. Client-only cache load (runs after hydration, so zero hydration mismatch)
+    const cached = getLocalStoredOverrides()[initialProduct.slug];
+    if (cached) {
+      setProduct((prev) => applyOverrideToProduct(prev, cached));
+    }
+
+    // 2. Fetch live from Supabase
+    fetchProductOverride(initialProduct.slug).then((liveOverride) => {
+      if (liveOverride) {
+        setProduct((prev) => applyOverrideToProduct(prev, liveOverride));
+      }
+    });
+
+    // 3. Real-time subscription to database changes and admin events
+    const unsubscribe = subscribeToProductPricing(initialProduct.slug, (latestOverride) => {
+      setProduct((prev) => applyOverrideToProduct(prev, latestOverride));
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [initialProduct.slug]);
 
   const currentVariant: VariantDetails = product.variants[selectedVariantKey];
 
@@ -200,7 +226,10 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
                   {selectedVariantKey === 'withLace' ? 'With Royal Lace' : 'Without Lace'}
                 </span>
                 {percentSaved > 0 && (
-                  <span className="bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-sm w-fit">
+                  <span
+                    suppressHydrationWarning
+                    className="bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-sm w-fit"
+                  >
                     {percentSaved}% OFF
                   </span>
                 )}
@@ -315,13 +344,22 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
                 <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
                   Unit Price:
                 </span>
-                <span className="text-3xl sm:text-4xl font-serif font-bold text-gray-900">
+                <span
+                  suppressHydrationWarning
+                  className="text-3xl sm:text-4xl font-serif font-bold text-gray-900"
+                >
                   {product.currency.symbol}{effectiveUnitPrice.toLocaleString()}
                 </span>
-                <span className="text-lg text-gray-400 line-through">
+                <span
+                  suppressHydrationWarning
+                  className="text-lg text-gray-400 line-through"
+                >
                   {product.currency.symbol}{baseActualUnitPrice.toLocaleString()}
                 </span>
-                <span className="bg-emerald-100 text-emerald-800 text-xs font-extrabold px-3 py-1 rounded-full border border-emerald-200">
+                <span
+                  suppressHydrationWarning
+                  className="bg-emerald-100 text-emerald-800 text-xs font-extrabold px-3 py-1 rounded-full border border-emerald-200"
+                >
                   Save {percentSaved}%
                 </span>
               </div>
@@ -330,12 +368,18 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
               <div className="flex items-center justify-between pt-2 border-t border-gray-200/60 text-xs text-gray-600">
                 <span>
                   Estimated Total ({quantity} {quantity === 1 ? 'unit' : 'units'}):{' '}
-                  <strong className="text-gray-900 text-sm font-serif">
+                  <strong
+                    suppressHydrationWarning
+                    className="text-gray-900 text-sm font-serif"
+                  >
                     {product.currency.symbol}{totalDiscountedPrice.toLocaleString()}
                   </strong>
                 </span>
                 {totalSaved > 0 && (
-                  <span className="text-emerald-700 font-semibold">
+                  <span
+                    suppressHydrationWarning
+                    className="text-emerald-700 font-semibold"
+                  >
                     Total Savings: {product.currency.symbol}{totalSaved.toLocaleString()}
                   </span>
                 )}
@@ -392,10 +436,16 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
                   </div>
 
                   <div className="mt-3 pt-2 border-t border-gray-200/60 flex items-baseline gap-2">
-                    <span className="text-base font-serif font-bold text-gray-900">
+                    <span
+                      suppressHydrationWarning
+                      className="text-base font-serif font-bold text-gray-900"
+                    >
                       {product.currency.symbol}{product.variants.withoutLace.discountedPrice}
                     </span>
-                    <span className="text-xs text-gray-400 line-through">
+                    <span
+                      suppressHydrationWarning
+                      className="text-xs text-gray-400 line-through"
+                    >
                       {product.currency.symbol}{product.variants.withoutLace.actualPrice}
                     </span>
                   </div>
@@ -437,10 +487,16 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
                   </div>
 
                   <div className="mt-3 pt-2 border-t border-gray-200/60 flex items-baseline gap-2">
-                    <span className="text-base font-serif font-bold text-gray-900">
+                    <span
+                      suppressHydrationWarning
+                      className="text-base font-serif font-bold text-gray-900"
+                    >
                       {product.currency.symbol}{product.variants.withLace.discountedPrice}
                     </span>
-                    <span className="text-xs text-gray-400 line-through">
+                    <span
+                      suppressHydrationWarning
+                      className="text-xs text-gray-400 line-through"
+                    >
                       {product.currency.symbol}{product.variants.withLace.actualPrice}
                     </span>
                   </div>

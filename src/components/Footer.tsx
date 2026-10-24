@@ -1,8 +1,16 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Ribbon } from 'lucide-react';
 
 export default function Footer() {
+  const pathname = usePathname();
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <div className="w-full bg-[#f4f1ea] px-4 pb-4 md:px-8 md:pb-8">
       <footer className="relative w-full bg-[#111111] rounded-[30px] md:rounded-[40px] overflow-hidden pt-16 md:pt-24 flex flex-col justify-between">

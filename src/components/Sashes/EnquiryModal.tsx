@@ -63,49 +63,74 @@ export default function EnquiryModal({
     const refCode = generateRef();
     setEnquiryRef(refCode);
 
+    const nowIso = new Date().toISOString();
+    const payload = {
+      reference_id: refCode,
+      product_name: product.title,
+      variant: variant.name,
+      color: selectedColor.name,
+      quantity: Number(quantity) || 1,
+      unit_price: Number(unitPrice) || 0,
+      total_price: Number(totalPrice) || 0,
+      customer_name: formData.fullName.trim(),
+      phone: formData.phone.trim(),
+      email: formData.email.trim(),
+      organization: formData.organization.trim() || null,
+      event_date: formData.eventDate || null,
+      notes: formData.customNotes.trim() || null,
+      status: 'pending',
+      created_at: nowIso,
+    };
+
+    let insertedId: string | null = null;
+
     try {
-      // Attempt saving to Supabase if 'enquiries' table is set up
-      const { error } = await supabase.from('enquiries').insert([
-        {
-          reference_id: refCode,
-          product_name: product.title,
-          variant: variant.name,
-          color: selectedColor.name,
-          quantity: quantity,
-          unit_price: unitPrice,
-          total_price: totalPrice,
-          customer_name: formData.fullName,
-          phone: formData.phone,
-          email: formData.email,
-          organization: formData.organization,
-          event_date: formData.eventDate,
-          notes: formData.customNotes,
-          created_at: new Date().toISOString(),
-        },
-      ]);
+      // 1. Store directly in Supabase table 'enquiries'
+      const { data, error } = await supabase
+        .from('enquiries')
+        .insert([payload])
+        .select();
 
       if (error) {
-        console.warn('Supabase enquiry insert skipped/fallback (table may not exist yet):', error.message);
+        console.warn('Supabase enquiry insert warning:', error.message);
+      } else if (data && data[0]) {
+        insertedId = data[0].id?.toString() || null;
       }
     } catch (err) {
-      console.warn('Supabase offline or table missing, recorded locally:', err);
+      console.warn('Supabase connection warning, recorded locally:', err);
     } finally {
-      // Always store locally so admin or user can view past enquiries
+      // 2. Always store full detailed record locally for zero-latency admin dashboard visibility
+      const detailedRecord = {
+        ...payload,
+        id: insertedId || `local-${Date.now()}`,
+        ref: refCode,
+        date: nowIso,
+        product: product.title,
+        unitPrice: Number(unitPrice) || 0,
+        totalPrice: Number(totalPrice) || 0,
+        fullName: formData.fullName.trim(),
+        customNotes: formData.customNotes.trim(),
+        eventDate: formData.eventDate,
+      };
+
       try {
         const stored = JSON.parse(localStorage.getItem('sashcraft_enquiries') || '[]');
-        stored.push({
-          ref: refCode,
-          date: new Date().toISOString(),
-          product: product.title,
-          variant: variant.name,
-          color: selectedColor.name,
-          quantity,
-          totalPrice,
-          ...formData,
-        });
+        // Prepend to top of list
+        stored.unshift(detailedRecord);
         localStorage.setItem('sashcraft_enquiries', JSON.stringify(stored));
+
+        // 3. Emit real-time intra-window & cross-tab events
+        window.dispatchEvent(
+          new CustomEvent('sashcraft_new_enquiry', { detail: detailedRecord })
+        );
+
+        if ('BroadcastChannel' in window) {
+          const bc = new BroadcastChannel('sashcraft_enquiries_channel');
+          bc.postMessage(detailedRecord);
+          bc.close();
+        }
       } catch (e) {
-        console.error(e);
+        console.error('LocalStorage write error:', e);
       }
 
       setIsSubmitting(false);

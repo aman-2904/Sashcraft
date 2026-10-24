@@ -14,6 +14,10 @@ export default function Navbar() {
   const isHome = pathname === '/';
   const isCategory = pathname.startsWith('/sashes') || pathname.startsWith('/categories');
 
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <div className="fixed top-6 left-1/2 -translate-x-1/2 w-[95%] max-w-[1400px] z-50">
       <nav className="flex items-center justify-between px-6 lg:px-8 py-3 bg-white/70 backdrop-blur-md border border-black rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.08)]">
