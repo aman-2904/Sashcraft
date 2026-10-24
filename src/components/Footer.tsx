@@ -38,6 +38,7 @@ export default function Footer() {
               <h4 className="font-bold text-[#b8860b] text-[12px] tracking-widest uppercase mb-2">Categories</h4>
               <ul className="flex flex-col gap-4">
                 <li><Link href="/sashes/satinsashes" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Graduation Sashes</Link></li>
+                <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Stoles</a></li>
                 <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Gowns & Caps</a></li>
                 <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Custom Aprons & Tees</a></li>
                 <li><a href="#" className="text-gray-400 hover:text-white text-[14px] font-medium transition-colors">Jute & Tote Bags</a></li>

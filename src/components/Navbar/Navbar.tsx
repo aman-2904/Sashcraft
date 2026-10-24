@@ -170,6 +170,7 @@ export default function Navbar() {
                   </div>
                 </div>
 
+                <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Stoles</a>
                 <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Gowns & Caps</a>
                 <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Custom Aprons & Tees</a>
                 <a href="#" className="px-4 py-2.5 text-[14px] font-semibold text-gray-700 hover:text-[#b8860b] hover:bg-[#fdfaf2] rounded-xl transition-colors whitespace-nowrap">Jute & Tote Bags</a>
@@ -392,6 +393,7 @@ export default function Navbar() {
                     )}
                   </li>
 
+                  <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1 mt-1">Stoles</a></li>
                   <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1 mt-1">Gowns & Caps</a></li>
                   <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1 mt-1">Custom Aprons & Tees</a></li>
                   <li><a href="#" className="text-gray-600 hover:text-[#b8860b] text-[15px] font-semibold block py-1 mt-1">Jute & Tote Bags</a></li>
