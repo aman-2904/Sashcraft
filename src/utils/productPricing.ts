@@ -204,30 +204,43 @@ export async function fetchAllProductOverrides(): Promise<Record<string, AdminPr
 export async function saveProductOverride(
   override: AdminProductOverride
 ): Promise<{ success: boolean; error?: string }> {
-  // 1. Save locally
-  try {
-    const local = getLocalStoredOverrides();
-    local[override.slug] = {
-      ...override,
-      lastUpdated: new Date().toISOString(),
-    };
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(local));
-
-      // 2. Emit instant local broadcast event
+  // 1. Always emit instant local broadcast event and BroadcastChannel first
+  if (typeof window !== 'undefined') {
+    try {
       window.dispatchEvent(
-        new CustomEvent(PRICING_UPDATED_EVENT, { detail: local[override.slug] })
+        new CustomEvent(PRICING_UPDATED_EVENT, { detail: override })
       );
-
-      // BroadcastChannel for cross-tab immediate synchronization
       if ('BroadcastChannel' in window) {
         const bc = new BroadcastChannel(PRICING_CHANNEL_NAME);
-        bc.postMessage(local[override.slug]);
+        bc.postMessage(override);
         bc.close();
       }
+    } catch (e) {
+      console.warn('Failed to emit pricing broadcast event:', e);
     }
-  } catch (e) {
-    console.warn('Failed to save to localStorage:', e);
+
+    // 2. Safely cache into localStorage without breaking if quota is exceeded
+    try {
+      const local = getLocalStoredOverrides();
+      local[override.slug] = {
+        ...override,
+        lastUpdated: new Date().toISOString(),
+      };
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(local));
+    } catch (quotaErr) {
+      console.warn('LocalStorage quota limit reached, saving metadata fallback:', quotaErr);
+      try {
+        const local = getLocalStoredOverrides();
+        local[override.slug] = {
+          ...override,
+          images: override.images?.filter((img) => !img.startsWith('data:')),
+          withLaceImages: override.withLaceImages?.filter((img) => !img.startsWith('data:')),
+          withoutLaceImages: override.withoutLaceImages?.filter((img) => !img.startsWith('data:')),
+          lastUpdated: new Date().toISOString(),
+        };
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(local));
+      } catch {}
+    }
   }
 
   // 3. Persist into Supabase sash_products table

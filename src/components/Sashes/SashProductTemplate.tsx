@@ -216,10 +216,18 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
 
   const allGalleryImages = Array.from(
     new Set([
-      ...product.variants.withLace.images,
-      ...product.variants.withoutLace.images,
+      ...(product.variants.withLace.images || []),
+      ...(product.variants.withoutLace.images || []),
     ])
-  );
+  ).filter((img) => typeof img === 'string' && img.trim().length > 0);
+
+  const displayGalleryImages =
+    allGalleryImages.length > 0 ? allGalleryImages : ['/images/products/satin-lace-1.jpg'];
+
+  const displayActiveImage =
+    (activeImage && displayGalleryImages.includes(activeImage) ? activeImage : null) ||
+    product.variants[selectedVariantKey]?.images?.[0] ||
+    displayGalleryImages[0];
 
   return (
     <div className="w-full min-h-screen bg-[#fcfbfa] text-gray-900 pb-20">
@@ -255,14 +263,14 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
             
             {/* Vertical / Upward Thumbnail Selector */}
             <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto max-h-[580px] pb-2 md:pb-0 scrollbar-none shrink-0">
-              {allGalleryImages.map((imgSrc, idx) => {
-                const isSelected = activeImage === imgSrc;
+              {displayGalleryImages.map((imgSrc, idx) => {
+                const isSelected = displayActiveImage === imgSrc;
                 return (
                   <button
-                    key={idx}
+                    key={`${imgSrc}-${idx}`}
                     type="button"
                     onClick={() => setActiveImage(imgSrc)}
-                    className={`relative w-16 h-20 md:w-20 md:h-24 rounded-2xl overflow-hidden border-2 transition-all shrink-0 bg-white group ${
+                    className={`relative w-16 h-20 md:w-20 md:h-24 rounded-2xl overflow-hidden border-2 transition-all shrink-0 bg-white group cursor-pointer ${
                       isSelected
                         ? 'border-[#dfad2d] shadow-md ring-2 ring-[#dfad2d]/20 scale-[1.02]'
                         : 'border-gray-200 hover:border-gray-300 opacity-75 hover:opacity-100'
@@ -310,7 +318,7 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
                     const isAdded = toggleWishlist(product.slug);
                     setIsWishlisted(isAdded);
                   }}
-                  className={`w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center transition-all ${
+                  className={`w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center transition-all cursor-pointer ${
                     isWishlisted
                       ? 'bg-rose-50 text-rose-500 border border-rose-200'
                       : 'bg-white/80 hover:bg-white text-gray-700 border border-gray-200 shadow-sm'
@@ -322,23 +330,24 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
                 <button
                   type="button"
                   onClick={() => setIsZoomOpen(true)}
-                  className="w-9 h-9 rounded-full bg-white/80 hover:bg-white text-gray-700 border border-gray-200 shadow-sm backdrop-blur-md flex items-center justify-center transition-all hover:scale-105"
+                  className="w-9 h-9 rounded-full bg-white/80 hover:bg-white text-gray-700 border border-gray-200 shadow-sm backdrop-blur-md flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
                   title="Fullscreen image view"
                 >
                   <Maximize2 size={16} />
                 </button>
               </div>
 
-              {/* Main Image Display */}
+              {/* Main Image Display with Silky Smooth Transition */}
               <div className="relative w-full h-full p-4 flex items-center justify-center">
                 <Image
-                  src={activeImage}
+                  key={displayActiveImage}
+                  src={displayActiveImage}
                   alt={product.title}
                   fill
                   priority
                   unoptimized
                   sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-contain p-2 group-hover:scale-105 transition-transform duration-700 ease-out"
+                  className="object-contain p-2 group-hover:scale-105 transition-all duration-500 ease-out animate-in fade-in zoom-in-[0.98]"
                 />
               </div>
 
@@ -348,9 +357,11 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
                   type="button"
                   onClick={() => {
                     setSelectedVariantKey('withoutLace');
-                    setActiveImage(product.variants.withoutLace.images[0]);
+                    if (product.variants.withoutLace.images?.length > 0) {
+                      setActiveImage(product.variants.withoutLace.images[0]);
+                    }
                   }}
-                  className={`hover:text-[#b8860b] transition-colors ${
+                  className={`hover:text-[#b8860b] transition-colors cursor-pointer ${
                     selectedVariantKey === 'withoutLace' ? 'text-[#b8860b] font-bold' : ''
                   }`}
                 >
@@ -361,9 +372,11 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
                   type="button"
                   onClick={() => {
                     setSelectedVariantKey('withLace');
-                    setActiveImage(product.variants.withLace.images[0]);
+                    if (product.variants.withLace.images?.length > 0) {
+                      setActiveImage(product.variants.withLace.images[0]);
+                    }
                   }}
-                  className={`hover:text-[#b8860b] transition-colors ${
+                  className={`hover:text-[#b8860b] transition-colors cursor-pointer ${
                     selectedVariantKey === 'withLace' ? 'text-[#b8860b] font-bold' : ''
                   }`}
                 >

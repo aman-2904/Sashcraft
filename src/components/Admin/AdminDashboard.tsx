@@ -483,8 +483,9 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
         img.src = event.target?.result as string;
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 1200;
-          const MAX_HEIGHT = 1600;
+          // High-definition ecommerce resolution for crisp retina view while keeping DB storage super lightweight (~45-65KB)
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 1060;
           let width = img.width;
           let height = img.height;
 
@@ -502,10 +503,16 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
 
           canvas.width = width;
           canvas.height = height;
-          const ctx = canvas.getContext('2d');
+          const ctx = canvas.getContext('2d', { alpha: false });
           if (ctx) {
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            // Pure white background for transparent PNGs so they don't turn black in JPEG
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
             ctx.drawImage(img, 0, 0, width, height);
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            // 0.80 JPEG quality for pristine regalia details and instant website rendering
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.80);
             resolve(dataUrl);
           } else {
             resolve(event.target?.result as string);
@@ -517,14 +524,34 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
     });
   };
 
-  const handleAddImage = (slug: string, variantKey: 'withLace' | 'withoutLace', url: string) => {
+  // Helper to persist a single product update directly to Supabase
+  const persistProductUpdate = async (prod: SashProductConfig) => {
+    const override: AdminProductOverride = {
+      id: prod.id,
+      slug: prod.slug,
+      title: prod.title,
+      inStock: prod.inStock,
+      withoutLaceActual: prod.variants.withoutLace.actualPrice,
+      withoutLaceDiscounted: prod.variants.withoutLace.discountedPrice,
+      withLaceActual: prod.variants.withLace.actualPrice,
+      withLaceDiscounted: prod.variants.withLace.discountedPrice,
+      images: Array.from(new Set([...prod.variants.withLace.images, ...prod.variants.withoutLace.images])),
+      withLaceImages: prod.variants.withLace.images,
+      withoutLaceImages: prod.variants.withoutLace.images,
+      lastUpdated: new Date().toISOString(),
+    };
+    return await saveProductOverride(override);
+  };
+
+  const handleAddImage = async (slug: string, variantKey: 'withLace' | 'withoutLace', url: string) => {
     const cleanUrl = url.trim();
     if (!cleanUrl) return;
+    let updatedProduct: SashProductConfig | null = null;
     setProductsList((prev) =>
       prev.map((prod) => {
         if (prod.slug !== slug) return prod;
         const currentImages = prod.variants[variantKey].images || [];
-        return {
+        const updated = {
           ...prod,
           variants: {
             ...prod.variants,
@@ -534,17 +561,28 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
             },
           },
         };
+        updatedProduct = updated;
+        return updated;
       })
     );
     setNewImageUrls((prev) => ({ ...prev, [`${slug}_${variantKey}`]: '' }));
+
+    if (updatedProduct) {
+      const res = await persistProductUpdate(updatedProduct);
+      if (res.success) {
+        setSavedProductToast(`✓ Image URL saved to database & live on website!`);
+        setTimeout(() => setSavedProductToast(null), 3500);
+      }
+    }
   };
 
-  const handleRemoveImage = (slug: string, variantKey: 'withLace' | 'withoutLace', indexToRemove: number) => {
+  const handleRemoveImage = async (slug: string, variantKey: 'withLace' | 'withoutLace', indexToRemove: number) => {
+    let updatedProduct: SashProductConfig | null = null;
     setProductsList((prev) =>
       prev.map((prod) => {
         if (prod.slug !== slug) return prod;
         const updatedImages = prod.variants[variantKey].images.filter((_, idx) => idx !== indexToRemove);
-        return {
+        const updated = {
           ...prod,
           variants: {
             ...prod.variants,
@@ -554,11 +592,20 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
             },
           },
         };
+        updatedProduct = updated;
+        return updated;
       })
     );
+
+    if (updatedProduct) {
+      await persistProductUpdate(updatedProduct);
+      setSavedProductToast(`✓ Image removed & database updated!`);
+      setTimeout(() => setSavedProductToast(null), 3000);
+    }
   };
 
-  const handleSetPrimaryImage = (slug: string, variantKey: 'withLace' | 'withoutLace', indexToPrimary: number) => {
+  const handleSetPrimaryImage = async (slug: string, variantKey: 'withLace' | 'withoutLace', indexToPrimary: number) => {
+    let updatedProduct: SashProductConfig | null = null;
     setProductsList((prev) =>
       prev.map((prod) => {
         if (prod.slug !== slug) return prod;
@@ -567,7 +614,7 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
           const [primary] = images.splice(indexToPrimary, 1);
           images.unshift(primary);
         }
-        return {
+        const updated = {
           ...prod,
           variants: {
             ...prod.variants,
@@ -577,19 +624,56 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
             },
           },
         };
+        updatedProduct = updated;
+        return updated;
       })
     );
+
+    if (updatedProduct) {
+      await persistProductUpdate(updatedProduct);
+      setSavedProductToast(`✓ Cover image updated & saved to database!`);
+      setTimeout(() => setSavedProductToast(null), 3000);
+    }
   };
 
   const handleImageUpload = async (slug: string, variantKey: 'withLace' | 'withoutLace', file: File) => {
     try {
       setIsUploadingImage((prev) => ({ ...prev, [`${slug}_${variantKey}`]: true }));
       const dataUrl = await compressImageFile(file);
-      handleAddImage(slug, variantKey, dataUrl);
-      setSavedProductToast(`✓ Image added to ${slug}! Click 'Save Changes' to persist to database.`);
+      
+      let updatedProduct: SashProductConfig | null = null;
+      setProductsList((prev) =>
+        prev.map((prod) => {
+          if (prod.slug !== slug) return prod;
+          const currentImages = prod.variants[variantKey].images || [];
+          const updated = {
+            ...prod,
+            variants: {
+              ...prod.variants,
+              [variantKey]: {
+                ...prod.variants[variantKey],
+                images: [...currentImages, dataUrl],
+              },
+            },
+          };
+          updatedProduct = updated;
+          return updated;
+        })
+      );
+
+      if (updatedProduct) {
+        const res = await persistProductUpdate(updatedProduct);
+        if (res.success) {
+          setSavedProductToast(`✓ Image uploaded & stored in database! Live on website.`);
+        } else {
+          setSavedProductToast(`✓ Image uploaded! Click "Save" below to sync database (${res.error || 'local'}).`);
+        }
+      }
       setTimeout(() => setSavedProductToast(null), 4000);
     } catch (err) {
       console.error('Failed to read image file:', err);
+      setSavedProductToast('Failed to process image. Please try a different file.');
+      setTimeout(() => setSavedProductToast(null), 3000);
     } finally {
       setIsUploadingImage((prev) => ({ ...prev, [`${slug}_${variantKey}`]: false }));
     }
