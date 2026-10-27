@@ -47,7 +47,7 @@ export function mapRowToOverride(row: any): AdminProductOverride {
   return {
     id: row.id || row.slug,
     slug: row.slug,
-    title: row.title || '',
+    title: (row.title || row.name || '').trim(),
     inStock: row.in_stock !== undefined ? Boolean(row.in_stock) : true,
     withoutLaceActual: Number(row.without_lace_actual) || 0,
     withoutLaceDiscounted: Number(row.without_lace_discounted) || 0,
@@ -141,11 +141,11 @@ export async function fetchProductOverride(slug: string): Promise<AdminProductOv
   const cached = localOverrides[slug] || null;
 
   try {
-    // 2. Fetch live from Supabase sash_products table
+    // 2. Fetch live from Supabase sash_products table (matching either slug or id)
     const { data, error } = await supabase
       .from('sash_products')
       .select('*')
-      .eq('slug', slug)
+      .or(`slug.eq.${slug},id.eq.${slug}`)
       .maybeSingle();
 
     if (!error && data) {
@@ -153,7 +153,9 @@ export async function fetchProductOverride(slug: string): Promise<AdminProductOv
       // Update local cache with latest database state
       localOverrides[slug] = override;
       if (typeof window !== 'undefined') {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(localOverrides));
+        try {
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(localOverrides));
+        } catch {}
       }
       return override;
     }
@@ -247,6 +249,7 @@ export async function saveProductOverride(
   try {
     const updateFields: Record<string, any> = {
       title: override.title,
+      name: override.title,
       in_stock: override.inStock,
       without_lace_actual: override.withoutLaceActual,
       without_lace_discounted: override.withoutLaceDiscounted,

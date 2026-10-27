@@ -54,8 +54,18 @@ interface SashProductTemplateProps {
 }
 
 export default function SashProductTemplate({ initialProduct }: SashProductTemplateProps) {
-  // Initialize with initialProduct directly so SSR and client initial HTML match 100%
-  const [product, setProduct] = useState<SashProductConfig>(initialProduct);
+  // Initialize with initialProduct directly or cached override to avoid any title flicker
+  const [product, setProduct] = useState<SashProductConfig>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = getLocalStoredOverrides()[initialProduct.slug];
+        if (cached && (cached.title || cached.withoutLaceActual)) {
+          return applyOverrideToProduct(initialProduct, cached);
+        }
+      } catch {}
+    }
+    return initialProduct;
+  });
 
   const [selectedVariantKey, setSelectedVariantKey] = useState<'withoutLace' | 'withLace'>('withLace');
   const [selectedColor, setSelectedColor] = useState<ProductColor>(initialProduct.colors[0]);
@@ -76,10 +86,12 @@ export default function SashProductTemplate({ initialProduct }: SashProductTempl
   // Update internal product when initialProduct changes (e.g. page navigation)
   // and load live overrides from Supabase & cache post-hydration
   useEffect(() => {
-    // 1. Client-only cache load (runs after hydration, so zero hydration mismatch)
+    // 1. Client-only cache load
     const cached = getLocalStoredOverrides()[initialProduct.slug];
     if (cached) {
-      setProduct((prev) => applyOverrideToProduct(prev, cached));
+      setProduct(applyOverrideToProduct(initialProduct, cached));
+    } else {
+      setProduct(initialProduct);
     }
 
     // 2. Fetch live from Supabase

@@ -1,11 +1,22 @@
 import SashProductTemplate from '@/components/Sashes/SashProductTemplate';
 import { doubleLayerSashData } from '@/data/sashesData';
+import { fetchProductOverride, applyOverrideToProduct } from '@/utils/productPricing';
 
-export const metadata = {
-  title: 'Double Layer Heavy Fabric Sashes | SashCraft Artisanal Regalia',
-  description: 'Dual-faced 350 GSM architectural twill fabric ceremonial stoles with contrast reveal and golden lace options.',
-};
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-export default function DoubleLayerSashesPage() {
-  return <SashProductTemplate initialProduct={doubleLayerSashData} />;
+export async function generateMetadata() {
+  const override = await fetchProductOverride('doublelayer');
+  const title = override?.title?.trim() || doubleLayerSashData.title;
+  return {
+    title: `${title} | SashCraft Artisanal Regalia`,
+    description: doubleLayerSashData.tagline,
+  };
+}
+
+export default async function DoubleLayerSashesPage() {
+  const override = await fetchProductOverride('doublelayer');
+  const product = applyOverrideToProduct(doubleLayerSashData, override);
+
+  return <SashProductTemplate initialProduct={product} />;
 }
