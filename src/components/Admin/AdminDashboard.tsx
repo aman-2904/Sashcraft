@@ -16,7 +16,6 @@ import {
   LayoutDashboard,
   Inbox,
   Tags,
-  Palette,
   ShieldCheck,
   LogOut,
   ExternalLink,
@@ -45,9 +44,6 @@ import {
   Building,
   Database,
   Copy,
-  CheckCheck,
-  Terminal,
-  TableProperties,
   Loader2,
   MapPin,
   Upload,
@@ -63,7 +59,7 @@ interface AdminDashboardProps {
 }
 
 export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'enquiries' | 'products' | 'database' | 'customizer' | 'security'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'enquiries' | 'products' | 'security'>('overview');
 
   // Enquiries State
   const [enquiries, setEnquiries] = useState<CustomerEnquiry[]>([]);
@@ -85,7 +81,6 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
     message: string;
   } | null>(null);
   const [isCheckingDb, setIsCheckingDb] = useState(false);
-  const [isCopiedSql, setIsCopiedSql] = useState(false);
 
   // Toast feedback
   const [toast, setToast] = useState<string | null>(null);
@@ -373,7 +368,7 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
     showToast(
       res.tableExists
         ? '✓ Connected! Table sash_products is live and synced.'
-        : '⚠️ Supabase reachable, but tables need to be created. See Database tab.'
+        : '⚠️ Supabase reachable, but tables need to be created in Supabase.'
     );
   };
 
@@ -965,37 +960,6 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
               <span>Products & Pricing</span>
             </button>
 
-            <button
-              onClick={() => setActiveTab('database')}
-              className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
-                activeTab === 'database'
-                  ? 'bg-gradient-to-r from-[#dfad2d]/20 to-[#a87e14]/10 text-[#dfad2d] border border-[#dfad2d]/30'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800/40'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Database size={18} />
-                <span>Supabase SQL & DB</span>
-              </div>
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  dbStatus?.tableExists ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'
-                }`}
-                title={dbStatus?.tableExists ? 'Database Connected & Synced' : 'Tables Pending SQL Run'}
-              />
-            </button>
-
-            <button
-              onClick={() => setActiveTab('customizer')}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
-                activeTab === 'customizer'
-                  ? 'bg-gradient-to-r from-[#dfad2d]/20 to-[#a87e14]/10 text-[#dfad2d] border border-[#dfad2d]/30'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800/40'
-              }`}
-            >
-              <Palette size={18} />
-              <span>Customizer Studio</span>
-            </button>
 
             <button
               onClick={() => setActiveTab('security')}
@@ -1030,8 +994,6 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
               { id: 'overview', label: 'Overview', icon: LayoutDashboard },
               { id: 'enquiries', label: `Quotes (${pendingCount})`, icon: Inbox },
               { id: 'products', label: 'Products', icon: Tags },
-              { id: 'database', label: 'Supabase SQL', icon: Database },
-              { id: 'customizer', label: 'Customizer', icon: Palette },
               { id: 'security', label: 'Security', icon: ShieldCheck },
             ].map((t) => {
               const Icon = t.icon;
@@ -1669,12 +1631,6 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
                     {isCheckingDb ? 'Checking...' : 'Check DB'}
                   </button>
 
-                  <button
-                    onClick={() => setActiveTab('database')}
-                    className="px-3 py-1.5 rounded-lg bg-[#dfad2d] hover:bg-[#b8860b] text-gray-950 text-[11px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
-                  >
-                    <Terminal size={12} /> Supabase SQL Setup
-                  </button>
                 </div>
               </div>
 
@@ -2056,410 +2012,7 @@ export default function AdminDashboard({ user, onSignOut }: AdminDashboardProps)
               </div>
             </div>
           )}
-
-          {/* ================= TAB 4: SUPABASE DATABASE & SQL SETUP ================= */}
-          {activeTab === 'database' && (
-            <div className="space-y-6 max-w-5xl">
-              <div>
-                <h2 className="text-2xl font-serif font-bold text-white">Supabase Cloud Database & Tables</h2>
-                <p className="text-xs text-gray-400 mt-1">
-                  Run this SQL script in your Supabase SQL Editor to enable live multi-device pricing controls and customer quote storage.
-                </p>
-              </div>
-
-              {/* Status & Quick Action Card */}
-              <div className="p-6 rounded-3xl bg-[#111520] border border-gray-800 space-y-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-800 pb-5">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-3">
-                      <h3 className="font-bold text-white text-base">Supabase Live Connection</h3>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 ${
-                          dbStatus?.tableExists
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                            : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
-                        }`}
-                      >
-                        {dbStatus?.tableExists ? (
-                          <>
-                            <CheckCircle2 size={13} /> Tables Active & Synced
-                          </>
-                        ) : (
-                          <>
-                            <AlertCircle size={13} /> SQL Execution Pending
-                          </>
-                        )}
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-400">
-                      Connected to Supabase Project: <code className="text-[#dfad2d] font-mono">puvamplilzqkzjyuwkuc</code>
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2.5">
-                    <button
-                      onClick={handleTestConnection}
-                      disabled={isCheckingDb}
-                      className="px-4 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold flex items-center gap-2 cursor-pointer transition-colors"
-                    >
-                      <RefreshCw size={14} className={isCheckingDb ? 'animate-spin' : ''} />
-                      {isCheckingDb ? 'Checking...' : 'Test Connection'}
-                    </button>
-
-                    <a
-                      href="https://supabase.com/dashboard/project/puvamplilzqkzjyuwkuc/sql/new"
-                      target="_blank"
-                      rel="noreferrer"
-                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#b8860b] to-[#dfad2d] text-gray-950 text-xs font-bold flex items-center gap-1.5 shadow-md hover:scale-105 transition-all"
-                    >
-                      Open Supabase SQL Editor <ExternalLink size={13} />
-                    </a>
-                  </div>
-                </div>
-
-                {/* Table Summary Badges */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                  <div className="p-4 rounded-2xl bg-black/40 border border-gray-800 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-white flex items-center gap-2">
-                        <TableProperties size={15} className="text-[#dfad2d]" />
-                        public.sash_products
-                      </span>
-                      <span className={`text-[10px] px-2 py-0.5 rounded font-mono ${
-                        dbStatus?.tableExists ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
-                      }`}>
-                        {dbStatus?.tableExists ? `${dbStatus.productCount} rows active` : 'Needs SQL Run'}
-                      </span>
-                    </div>
-                    <p className="text-gray-400 text-[11px] leading-relaxed">
-                      Stores product pricing (with & without lace), in_stock status, and categories. Enables instant real-time price updates on storefront.
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-2xl bg-black/40 border border-gray-800 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold text-white flex items-center gap-2">
-                        <Inbox size={15} className="text-[#dfad2d]" />
-                        public.enquiries
-                      </span>
-                      <span className="text-[10px] px-2 py-0.5 rounded font-mono bg-emerald-500/20 text-emerald-400">
-                        Ready
-                      </span>
-                    </div>
-                    <p className="text-gray-400 text-[11px] leading-relaxed">
-                      Stores customer convocation quote requests, contact numbers, event dates, quantities, and custom embroidery specifications.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Step-by-Step Instructions */}
-                <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-xs space-y-2">
-                  <div className="font-bold text-[#dfad2d] flex items-center gap-2">
-                    <Sparkles size={14} /> 3-Step Setup Instructions:
-                  </div>
-                  <ol className="list-decimal list-inside space-y-1.5 text-gray-300 text-[11px] leading-relaxed pl-1">
-                    <li>
-                      Click the green <strong>Copy SQL Script</strong> button below.
-                    </li>
-                    <li>
-                      Open your Supabase Project{' '}
-                      <a
-                        href="https://supabase.com/dashboard/project/puvamplilzqkzjyuwkuc/sql/new"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[#dfad2d] underline hover:text-white"
-                      >
-                        SQL Editor
-                      </a>
-                      , paste the script into a new query, and click <strong>RUN</strong>.
-                    </li>
-                    <li>
-                      Return to this page and click <strong>Test Connection</strong>. The status will turn green and live price sync is immediately activated!
-                    </li>
-                  </ol>
-                </div>
-
-                {/* SQL Code Box with 1-Click Copy */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono text-gray-400 flex items-center gap-1.5">
-                      <Terminal size={14} className="text-[#dfad2d]" />
-                      supabase_schema.sql
-                    </span>
-
-                    <button
-                      onClick={() => {
-                        const sqlText = `-- ====================================================================
--- SASHCRAFT SUPABASE DATABASE INITIALIZATION SCRIPT
--- ====================================================================
-
--- 1. Create sash_products table (Live pricing and stock control)
-CREATE TABLE IF NOT EXISTS public.sash_products (
-    id TEXT PRIMARY KEY,
-    slug TEXT UNIQUE NOT NULL,
-    title TEXT NOT NULL,
-    category TEXT,
-    tagline TEXT,
-    in_stock BOOLEAN DEFAULT true NOT NULL,
-    without_lace_actual NUMERIC NOT NULL,
-    without_lace_discounted NUMERIC NOT NULL,
-    with_lace_actual NUMERIC NOT NULL,
-    with_lace_discounted NUMERIC NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- Ensure title and image columns exist if table was previously created
-ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS title TEXT;
-ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS images JSONB;
-ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS with_lace_images JSONB;
-ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS without_lace_images JSONB;
-
--- 2. Create enquiries table (Customer quote requests & custom orders)
-CREATE TABLE IF NOT EXISTS public.enquiries (
-    id BIGSERIAL PRIMARY KEY,
-    reference_id TEXT NOT NULL,
-    product_name TEXT NOT NULL,
-    variant TEXT NOT NULL,
-    color TEXT NOT NULL,
-    quantity INTEGER NOT NULL,
-    unit_price NUMERIC NOT NULL,
-    total_price NUMERIC NOT NULL,
-    customer_name TEXT NOT NULL,
-    phone TEXT NOT NULL,
-    email TEXT NOT NULL,
-    address TEXT,
-    organization TEXT,
-    event_date TEXT,
-    notes TEXT,
-    status TEXT DEFAULT 'pending' NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- Ensure address column exists if table was already created
-ALTER TABLE public.enquiries ADD COLUMN IF NOT EXISTS address TEXT;
-
--- 3. Enable Row Level Security (RLS)
-ALTER TABLE public.sash_products ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.enquiries ENABLE ROW LEVEL SECURITY;
-
--- 4. RLS Policies
-DROP POLICY IF EXISTS "Public Read Access on sash_products" ON public.sash_products;
-CREATE POLICY "Public Read Access on sash_products" ON public.sash_products FOR SELECT USING (true);
-
-DROP POLICY IF EXISTS "Allow All Updates on sash_products" ON public.sash_products;
-CREATE POLICY "Allow All Updates on sash_products" ON public.sash_products FOR ALL USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Public Insert on enquiries" ON public.enquiries;
-CREATE POLICY "Public Insert on enquiries" ON public.enquiries FOR INSERT WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Allow All Access on enquiries" ON public.enquiries;
-CREATE POLICY "Allow All Access on enquiries" ON public.enquiries FOR ALL USING (true) WITH CHECK (true);
-
--- 5. Enable Realtime Replication
-ALTER PUBLICATION supabase_realtime ADD TABLE public.sash_products;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.enquiries;
-
--- 6. Seed Initial Catalog Data (4 Sash Lines)
-INSERT INTO public.sash_products (
-    id, slug, title, category, tagline, in_stock, 
-    without_lace_actual, without_lace_discounted, 
-    with_lace_actual, with_lace_discounted, updated_at
-)
-VALUES
-    ('satin', 'satinsashes', 'Imperial Double-Faced Satin Sash', 'Ceremonial Sashes & Stoles', 'Ultra-glossy heavy bridal satin with pristine luster', true, 799, 499, 2000, 1000, now()),
-    ('velvet', 'velvetsashes', 'Royal Ceremonial Plush Velvet Sash', 'Luxury Regalia & Honor Stoles', 'Heavy deep-pile micro-velvet tailored for high dignitary regalia', true, 1099, 699, 1499, 999, now()),
-    ('double-layer', 'doublelayer', 'Artisanal Double-Layer Regal Sash', 'Heritage Bordered Regalia', 'Two contrasting satin layers with ornamental border margin reveal', true, 999, 599, 1399, 849, now()),
-    ('single-layer', 'singlelayer', 'Heavy Fabric Precision Single-Layer Sash', 'Institutional & Bulk Sashes', '280 GSM crisp woven heavy fabric engineered for convocation cohorts', true, 599, 349, 899, 549, now())
-ON CONFLICT (slug) DO UPDATE SET
-    title = EXCLUDED.title,
-    category = EXCLUDED.category,
-    tagline = EXCLUDED.tagline,
-    without_lace_actual = EXCLUDED.without_lace_actual,
-    without_lace_discounted = EXCLUDED.without_lace_discounted,
-    with_lace_actual = EXCLUDED.with_lace_actual,
-    with_lace_discounted = EXCLUDED.with_lace_discounted,
-    in_stock = EXCLUDED.in_stock,
-    updated_at = now();`;
-
-                        navigator.clipboard.writeText(sqlText);
-                        setIsCopiedSql(true);
-                        showToast('✓ SQL script copied to clipboard! Paste it into Supabase SQL Editor.');
-                        setTimeout(() => setIsCopiedSql(false), 3000);
-                      }}
-                      className="px-4 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold text-xs flex items-center gap-1.5 shadow-md cursor-pointer transition-all"
-                    >
-                      {isCopiedSql ? <CheckCheck size={14} /> : <Copy size={14} />}
-                      {isCopiedSql ? 'Copied to Clipboard!' : 'Copy SQL Script'}
-                    </button>
-                  </div>
-
-                  <div className="relative">
-                    <pre className="p-4 rounded-2xl bg-black/80 border border-gray-800 text-[11px] font-mono text-emerald-400 overflow-x-auto max-h-96 leading-relaxed selection:bg-amber-500 selection:text-black">
-                      {`-- 1. Create sash_products table (Live pricing and stock control)
-CREATE TABLE IF NOT EXISTS public.sash_products (
-    id TEXT PRIMARY KEY,
-    slug TEXT UNIQUE NOT NULL,
-    title TEXT NOT NULL,
-    category TEXT,
-    tagline TEXT,
-    in_stock BOOLEAN DEFAULT true NOT NULL,
-    without_lace_actual NUMERIC NOT NULL,
-    without_lace_discounted NUMERIC NOT NULL,
-    with_lace_actual NUMERIC NOT NULL,
-    with_lace_discounted NUMERIC NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- Ensure title and image columns exist if table was previously created
-ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS title TEXT;
-ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS images JSONB;
-ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS with_lace_images JSONB;
-ALTER TABLE public.sash_products ADD COLUMN IF NOT EXISTS without_lace_images JSONB;
-
--- 2. Create enquiries table (Customer quote requests & custom orders)
-CREATE TABLE IF NOT EXISTS public.enquiries (
-    id BIGSERIAL PRIMARY KEY,
-    reference_id TEXT NOT NULL,
-    product_name TEXT NOT NULL,
-    variant TEXT NOT NULL,
-    color TEXT NOT NULL,
-    quantity INTEGER NOT NULL,
-    unit_price NUMERIC NOT NULL,
-    total_price NUMERIC NOT NULL,
-    customer_name TEXT NOT NULL,
-    phone TEXT NOT NULL,
-    email TEXT NOT NULL,
-    organization TEXT,
-    event_date TEXT,
-    notes TEXT,
-    status TEXT DEFAULT 'pending' NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- 3. Enable Row Level Security (RLS)
-ALTER TABLE public.sash_products ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.enquiries ENABLE ROW LEVEL SECURITY;
-
--- 4. RLS Policies
-DROP POLICY IF EXISTS "Public Read Access on sash_products" ON public.sash_products;
-CREATE POLICY "Public Read Access on sash_products" ON public.sash_products FOR SELECT USING (true);
-
-DROP POLICY IF EXISTS "Allow All Updates on sash_products" ON public.sash_products;
-CREATE POLICY "Allow All Updates on sash_products" ON public.sash_products FOR ALL USING (true) WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Public Insert on enquiries" ON public.enquiries;
-CREATE POLICY "Public Insert on enquiries" ON public.enquiries FOR INSERT WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Allow All Access on enquiries" ON public.enquiries;
-CREATE POLICY "Allow All Access on enquiries" ON public.enquiries FOR ALL USING (true) WITH CHECK (true);
-
--- 5. Enable Realtime Replication
-ALTER PUBLICATION supabase_realtime ADD TABLE public.sash_products;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.enquiries;
-
--- 6. Seed Initial Catalog Data (4 Sash Lines)
-INSERT INTO public.sash_products (
-    id, slug, title, category, tagline, in_stock, 
-    without_lace_actual, without_lace_discounted, 
-    with_lace_actual, with_lace_discounted, updated_at
-)
-VALUES
-    ('satin', 'satinsashes', 'Imperial Double-Faced Satin Sash', 'Ceremonial Sashes & Stoles', 'Ultra-glossy heavy bridal satin with pristine luster', true, 799, 499, 2000, 1000, now()),
-    ('velvet', 'velvetsashes', 'Royal Ceremonial Plush Velvet Sash', 'Luxury Regalia & Honor Stoles', 'Heavy deep-pile micro-velvet tailored for high dignitary regalia', true, 1099, 699, 1499, 999, now()),
-    ('double-layer', 'doublelayer', 'Artisanal Double-Layer Regal Sash', 'Heritage Bordered Regalia', 'Two contrasting satin layers with ornamental border margin reveal', true, 999, 599, 1399, 849, now()),
-    ('single-layer', 'singlelayer', 'Heavy Fabric Precision Single-Layer Sash', 'Institutional & Bulk Sashes', '280 GSM crisp woven heavy fabric engineered for convocation cohorts', true, 599, 349, 899, 549, now())
-ON CONFLICT (slug) DO UPDATE SET
-    title = EXCLUDED.title,
-    category = EXCLUDED.category,
-    tagline = EXCLUDED.tagline,
-    without_lace_actual = EXCLUDED.without_lace_actual,
-    without_lace_discounted = EXCLUDED.without_lace_discounted,
-    with_lace_actual = EXCLUDED.with_lace_actual,
-    with_lace_discounted = EXCLUDED.with_lace_discounted,
-    in_stock = EXCLUDED.in_stock,
-    updated_at = now();`}
-                    </pre>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ================= TAB 4: CUSTOMIZER STUDIO ================= */}
-          {activeTab === 'customizer' && (
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-serif font-bold text-white">Live Customizer Studio Integrations</h2>
-                <p className="text-xs text-gray-400 mt-1">
-                  Custom graduation designs crafted by users on sash product pages.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="p-6 rounded-3xl bg-[#111520] border border-gray-800 space-y-4">
-                  <div className="flex items-center gap-2 text-xs font-bold text-[#dfad2d] uppercase tracking-wider">
-                    <Palette size={16} /> Sample Custom Design #1
-                  </div>
-                  <div className="p-4 rounded-2xl bg-black/40 border border-gray-800 flex items-center justify-center min-h-[160px]">
-                    <div
-                      className="w-20 h-40 bg-[#111111] border-4 border-[#c19b38] flex items-center justify-center text-[#dfad2d] text-xs font-serif font-bold shadow-xl"
-                      style={{ writingMode: 'vertical-rl' }}
-                    >
-                      CLASS OF 2026
-                    </div>
-                  </div>
-                  <div className="text-xs text-gray-400 space-y-1">
-                    <div>Text: <strong>CLASS OF 2026</strong></div>
-                    <div>Typography: <strong>Serif Regal</strong></div>
-                    <div>Base Color: <strong>Midnight Black (#111111)</strong></div>
-                    <div>Border: <strong>Gold Lace Piping (#c19b38)</strong></div>
-                  </div>
-                </div>
-
-                <div className="p-6 rounded-3xl bg-[#111520] border border-gray-800 space-y-4">
-                  <div className="flex items-center gap-2 text-xs font-bold text-[#dfad2d] uppercase tracking-wider">
-                    <Palette size={16} /> Sample Custom Design #2
-                  </div>
-                  <div className="p-4 rounded-2xl bg-black/40 border border-gray-800 flex items-center justify-center min-h-[160px]">
-                    <div
-                      className="w-20 h-40 bg-[#580816] border-4 border-[#dfad2d] flex items-center justify-center text-[#dfad2d] text-xs font-serif font-bold shadow-xl"
-                      style={{ writingMode: 'vertical-rl' }}
-                    >
-                      VALEDICTORIAN
-                    </div>
-                  </div>
-                  <div className="text-xs text-gray-400 space-y-1">
-                    <div>Text: <strong>VALEDICTORIAN</strong></div>
-                    <div>Typography: <strong>Classic Roman</strong></div>
-                    <div>Base Color: <strong>Burgundy Crimson (#580816)</strong></div>
-                    <div>Border: <strong>Metallic Gold Lace (#dfad2d)</strong></div>
-                  </div>
-                </div>
-
-                <div className="p-6 rounded-3xl bg-[#111520] border border-gray-800 space-y-4">
-                  <div className="flex items-center gap-2 text-xs font-bold text-[#dfad2d] uppercase tracking-wider">
-                    <Palette size={16} /> Sample Custom Design #3
-                  </div>
-                  <div className="p-4 rounded-2xl bg-black/40 border border-gray-800 flex items-center justify-center min-h-[160px]">
-                    <div
-                      className="w-20 h-40 bg-[#0f224a] border-4 border-[#ffffff] flex items-center justify-center text-[#ffffff] text-xs font-sans font-bold shadow-xl"
-                      style={{ writingMode: 'vertical-rl' }}
-                    >
-                      SUMMA CUM LAUDE
-                    </div>
-                  </div>
-                  <div className="text-xs text-gray-400 space-y-1">
-                    <div>Text: <strong>SUMMA CUM LAUDE</strong></div>
-                    <div>Typography: <strong>Modern Clean</strong></div>
-                    <div>Base Color: <strong>Royal Navy (#0f224a)</strong></div>
-                    <div>Border: <strong>Pristine White (#ffffff)</strong></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ================= TAB 5: SECURITY & PASSKEY ================= */}
+          {/* ================= TAB 4: SECURITY & PASSKEY ================= */}
           {activeTab === 'security' && (
             <div className="space-y-6 max-w-4xl">
               <div>
